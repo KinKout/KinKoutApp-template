@@ -1,0 +1,60 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			Parameters.cpp
+* Author:		KinKoutDSP
+* Date:			28-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Namespace:	Parameters
+*
+* Purpose:		Define the APVTS parameter layout and resolve parameter value pointers.
+*
+* ================================================================================ */
+
+
+#include "Parameters.h"
+
+
+juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createLayout()
+{
+	juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+	// -------------------------------------------------------------------------------- 3. Define APVTS layout
+	// layout.add (std::make_unique<juce::AudioParameterFloat> (				// ~~~~~~~~ reference
+	// 	 dspModule_paramID,													// ParameterID + version hint
+	// 	 "DSP Module Param",												// display name (free to change)
+	// 	 juce::NormalisableRange (-20.0f, 20.0f, 0.01f),
+	// 	 0.0f));
+	
+	layout.add (std::make_unique<juce::AudioParameterFloat> (				// ^^^^^^^^ example, disposable
+		 gainOut_paramID,													// ParameterID + version hint
+		 "Gain Out",														// display name (free to change)
+		 juce::NormalisableRange (-60.0f, 20.0f, 0.01f),
+		 0.0f));
+
+	return layout;
+}
+
+Parameters::RawPointers Parameters::resolve (const juce::AudioProcessorValueTreeState& apvts)
+{
+	RawPointers ptrs;
+
+	// -------------------------------------------------------------------------------- 4. Resolve the IDs
+	// ptrs.dspModule_valuePtr = apvts.getRawParameterValue (dspModule_paramID.getParamID());	// ~~~~~~~~ reference
+	ptrs.gainOut_valuePtr = apvts.getRawParameterValue (gainOut_paramID.getParamID());			// ^^^^^^^^ example, disposable
+
+	return ptrs;
+}

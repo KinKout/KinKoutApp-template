@@ -1,0 +1,68 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			Engine.cpp
+* Author:		KinKoutDSP
+* Date:			18-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Class:		Engine
+*
+* Purpose:		Provide the processor-facing interface to the DSP chain.
+*
+* ================================================================================ */
+
+
+#include "Engine.h"
+
+
+Engine::Engine (InstRack& rackToUse)
+	: dspController (rackToUse)
+{
+}
+
+Engine::~Engine() = default;
+
+void Engine::bindParameters (const Parameters::RawPointers& params)
+{
+	dspController.bindParameters (params);
+}
+
+void Engine::prepare (const double sampleRate, const int maxBlockSize, const int numChannels)
+{
+	dspController.prepare (sampleRate, maxBlockSize, numChannels);
+}
+
+void Engine::process	(juce::AudioBuffer<float>* buffer,
+						const juce::AudioBuffer<float>* sidechain,
+						juce::MidiBuffer* midi)
+{
+	dspController.process (buffer, sidechain, midi);
+}
+
+void Engine::reset()
+{
+	dspController.reset();
+}
+
+int Engine::getLatencySamples() const
+{
+	return dspController.getLatencySamples();
+}
+
+double Engine::getTailLengthSeconds() const
+{
+	return dspController.getTailLengthSeconds();
+}

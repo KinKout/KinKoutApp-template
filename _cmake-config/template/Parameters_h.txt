@@ -1,0 +1,93 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			Parameters.h
+* Author:		KinKoutDSP
+* Date:			28-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Namespace:	Parameters
+*
+* Purpose:		Define the APVTS parameter layout and resolve parameter value pointers.
+*
+* ================================================================================
+*
+* Info:		This is a namespace, not an object. PluginProcessor owns the APVTS
+*			and resolves its parameter pointers once during construction.
+*			RawPointers borrows values from the APVTS; it does not own them.
+*			DSP modules receive atomic pointers, without APVTS or string IDs.
+*			Keep published parameter IDs and version hints unchanged.
+*
+* Usage:	To expose a new DSP parameter,
+*			Inside 'Parameters.h': -----------------------------------------------
+*			1. Declare a ParameterID with its ID and version hint.
+*				'inline const juce::ParameterID dspModule_paramID { "dspModule_ID", version };'
+*			2. Add an atomic float pointer to RawPointers, initially
+*			   nullptr,
+*				'std::atomic<float>* dspModule_valuePtr = nullptr;'
+*			Inside 'Parameters.cpp': ---------------------------------------------
+*			3. Add the parameter type, display name, range and
+*			   default value to createLayout(),
+*				'layout.add (std::make_unique<juce::AudioParameterFloat> (
+*				dspModule_paramID, "DSP Module Param", juce::NormalisableRange (-20.0f, 20.0f, 0.01f), 0.0f));'
+*			4. In Parameters::resolve(), assign the raw pointer,
+*				'ptrs.dspModule_valuePtr = apvts.getRawParameterValue (dspModule_paramID.getParamID());'
+*
+*			- In DspController::bindParameters(), pass that field to the module.
+*
+*			- Manage the version hint for new versions of the plugin.
+*
+*			Follow the existing example.
+*			Keep the value units consistent between the parameter definition
+*			and the DSP reader.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_audio_processors/juce_audio_processors.h>
+
+
+namespace Parameters
+{
+	// -------------------------------------------------------------------------------- APVTS layout declaration
+	juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
+
+	// -------------------------------------------------------------------------------- Version
+	// For newly published parameters, add a version hint higher than all previous
+	// hints. Keep existing IDs and hints unchanged to preserve AUv2 parameter
+	// ordering and saved automation. A hint affects ordering, not the ID string.
+	// Display names may change independently of IDs.
+	inline constexpr int version_1 { 1 };
+	// inline constexpr int version_2 { 2 }; etc.
+
+	// -------------------------------------------------------------------------------- 1. Declare parameter IDs
+	// inline const juce::ParameterID dspModule_paramID { "dspModule_ID", version };	// ~~~~~~~~ reference
+	inline const juce::ParameterID gainOut_paramID { "gainOut_ID", version_1 };			// ^^^^^^^^ example, disposable
+
+	// -------------------------------------------------------------------------------- 2. Declare raw pointers
+	// One borrowed value pointer per DSP parameter.
+	// Engine forwards the resolved struct to DspController, which distributes
+	// the pointers to modules. Use APVTS raw pointers for reading only; change
+	// parameters through JUCE parameter APIs or attachments.
+	struct RawPointers
+	{
+		// std::atomic<float>* dspModule_valuePtr = nullptr;				// ~~~~~~~~ reference
+		std::atomic<float>* gainOut_valuePtr = nullptr;						// ^^^^^^^^ example, disposable
+	};
+
+	RawPointers resolve (const juce::AudioProcessorValueTreeState& apvts);
+}

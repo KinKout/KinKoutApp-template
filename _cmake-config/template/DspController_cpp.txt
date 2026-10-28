@@ -1,0 +1,94 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			DspController.cpp
+* Author:		KinKoutDSP
+* Date:			20-Sep-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Class:		DspController
+*
+* Purpose:		Run the DSP modules mounted in InstRack.
+*
+* ================================================================================ */
+
+
+#include "DspController.h"
+#include "InstRack.h"
+#include "../dsp/_Dsp.h"
+
+
+DspController::DspController (InstRack& rackToUse)
+	: rack (rackToUse)
+{
+}
+
+DspController::~DspController() = default;
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void DspController::bindParameters (const Parameters::RawPointers& params)
+{
+	// -------------------------------------------------------------------------------- 1. Bind the parameters
+	// Pass each module the parameter pointers required by its binding method.
+	// rack.getDspModule().bindParameters (params.dspModule_valuePtr);		// ~~~~~~~~ reference
+	rack.getOutputGain().bindParameters (params.gainOut_valuePtr);			// ^^^^^^^^ example, disposable
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void DspController::prepare (const double sampleRate, const int maxBlockSize, const int numChannels)
+{
+	// -------------------------------------------------------------------------------- 2. Prepare the modules
+	// rack.getDspModule().prepare (sampleRate, maxBlockSize, numChannels);	// ~~~~~~~~ reference
+	rack.getOutputGain().prepare (sampleRate, maxBlockSize, numChannels);	// ^^^^^^^^ example, disposable
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void DspController::process	(juce::AudioBuffer<float>* buffer,
+							const juce::AudioBuffer<float>* sidechain,
+							juce::MidiBuffer* midi)
+{
+	// -------------------------------------------------------------------------------- 3. Process the modules
+	// This is the SKELETON wired by hand. The order below is the signal path.
+	// 'sidechain' and 'midi' may be nullptr when unused by the module,
+	// this will be handled by the module itself.
+	// rack.getDspModule().process (buffer, sidechain, midi);				// ~~~~~~~~ reference
+	rack.getOutputGain().process (buffer, sidechain, midi);					// ^^^^^^^^ example, disposable
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void DspController::reset()
+{
+	// -------------------------------------------------------------------------------- 4. Reset the modules
+	// rack.getDspModule().reset();											// ~~~~~~~~ reference
+	rack.getOutputGain().reset();											// ^^^^^^^^ example, disposable
+}
+
+int DspController::getLatencySamples() const
+{
+	int total = 0;
+	// -------------------------------------------------------------------------------- 5. Sum the latencies
+	// total += rack.getDspModule().getLatencySamples();					// ~~~~~~~~ reference
+	total += rack.getOutputGain().getLatencySamples();						// ^^^^^^^^ example, disposable
+	return total;
+}
+
+double DspController::getTailLengthSeconds() const
+{
+	double total = 0.0;
+	// -------------------------------------------------------------------------------- 6. Sum the tail lengths
+	// total += rack.getDspModule().getTailLengthSeconds();				// ~~~~~~~~ reference
+	total += rack.getOutputGain().getTailLengthSeconds();					// ^^^^^^^^ example, disposable
+	return total;
+}

@@ -1,0 +1,98 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			Engine.h
+* Author:		KinKoutDSP
+* Date:			18-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Class:		Engine
+*
+* Purpose:		Provide the processor-facing interface to the DSP chain.
+*
+* ================================================================================
+*
+* Info:		Owned by PluginProcessor.
+*			Owns DspController and passes it the rack.
+*			The rack must outlive Engine. All methods currently forward to
+*			DspController, including latency and tail queries.
+*			Latency compensation and DSP chain transitions are future extensions;
+*			neither is implemented here.
+*
+* Usage:	When adding a DSP module, edit InstRack and DspController.
+*			Engine needs no changes for that operation.
+*
+*			Extend this class when adding behavior that coordinates the whole
+*			chain, such as latency compensation or transitions between processing
+*			configurations. Keep individual module wiring in DspController.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_audio_basics/juce_audio_basics.h>
+
+#include "DspController.h"
+#include "Parameters.h"
+
+
+class InstRack;
+
+class Engine
+{
+public:
+	// -------------------------------------------------------------------------------- Main methods
+	// The rack is owned by the 'PluginProcessor' and must outlive the Engine.
+	explicit Engine (InstRack& rackToUse);
+	~Engine();
+
+	// Prepare the chain for the sample rate, block size and channel count
+	// supplied by the processor. Call before processing starts or resumes.
+	void prepare (double sampleRate, int maxBlockSize, int numChannels);
+
+	// process method:
+	// - buffer:			Pointer to the main audio buffer, modified in-place.
+	// - sidechain:			Pointer to an optional external sidechain input buffer
+	//						(nullptr if unused).
+	// - midi:				Pointer to an optional MIDI buffer containing MIDI events
+	//						(nullptr if unused).
+	// Real-time constraint: processing must not allocate, lock or perform I/O.
+	// Do not process the same module instances concurrently.
+	void process	(juce::AudioBuffer<float>* buffer,
+					const juce::AudioBuffer<float>* sidechain = nullptr,
+					juce::MidiBuffer* midi = nullptr);
+
+	// Delegate reset to the chain; each module defines how its state is reset.
+	void reset();
+
+	// Sum of the module latencies included by DspController, in samples.
+	// The 'PluginProcessor' reports it to the host.
+	int getLatencySamples() const;
+
+	// Sum of the module tail lengths included by DspController, in seconds.
+	// The current Gain-only chain reports zero.
+	double getTailLengthSeconds() const;
+
+	// Pass the resolved parameter pointers to DspController for module binding.
+	// Call before playback; the APVTS must outlive the modules using its values.
+	void bindParameters (const Parameters::RawPointers& params);
+
+private:
+	DspController dspController;
+
+	// ================================================================================
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Engine)
+};

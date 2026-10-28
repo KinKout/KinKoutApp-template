@@ -1,0 +1,88 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			InstRack.h
+* Author:		KinKoutDSP
+* Date:			20-Sep-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Class:		InstRack
+*
+* Purpose:		Create, own and expose the named DSP module instances.
+*
+* ================================================================================
+*
+* Info:		Owned by PluginProcessor.
+*			The rack is a main container of DSP modules used by the plugin.
+*			Names identify instances, not positions in the signal path.
+*			Getters lend references. Ownership stays with the rack.
+*			A const rack still exposes mutable modules so the controller can process audio.
+*			Creation happens in the constructor. unique_ptr handles destruction.
+*			The destructor is defined in the .cpp where module types are complete.
+*			Currently owns one Gain named outputGain to provide a simple example.
+*
+* Usage:	To mount a new module,
+*			Inside 'InstRack.h': -------------------------------------------------
+*			1. Forward-declare the class from DSP, 'class DspModule;'
+*			2. Declare a public getter to access the instance,
+*				'[[nodiscard]] DspModule& getDspModule() const;'
+*			3. Add a private pointer, 'std::unique_ptr<DspModule> newDspModule;'
+*			Inside 'InstRack.cpp': -----------------------------------------------
+*			4. In the constructor, create the instance,
+*				'newDspModule = std::make_unique<DspModule>();'
+*			5. Define the getter,
+*				'DspModule& InstRack::getDspModule() const { return *newDspModule; }'
+*
+*			Finally, connect the module in DspController.cpp.
+*			Choose an instance name that describes its role, as outputGain does
+*			for the Gain class.
+*
+*			Remember to add the new module class header to the appropriate DSP category
+*			umbrella header and enable that category in _Dsp.h if needed.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_core/juce_core.h>
+
+
+// -------------------------------------------------------------------------------- 1. Forward-declare the modules
+// class DspModule;														// ~~~~~~~~ reference
+class Gain;																// ^^^^^^^^ example, disposable
+
+class InstRack
+{
+public:
+	// unique_ptr's deleters need the DSP modules fully defined, not just
+	// forward-declared. The 'default' destructor is defined in InstRack.cpp,
+	// after the complete definition of the modules.
+	InstRack();
+	~InstRack();
+
+	// -------------------------------------------------------------------------------- 2. Declare the getters
+	// Project convention: use the getter name as a stable instance label.
+	// [[nodiscard]] DspModule& getDspModule() const;						// ~~~~~~~~ reference
+	[[nodiscard]] Gain& getOutputGain() const;								// ^^^^^^^^ example, disposable
+
+private:
+	// -------------------------------------------------------------------------------- 3. Declare the modules
+	// std::unique_ptr<DspModule> newDspModule;								// ~~~~~~~~ reference
+	std::unique_ptr<Gain> outputGain;										// ^^^^^^^^ example, disposable
+
+	// ================================================================================
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InstRack)
+};

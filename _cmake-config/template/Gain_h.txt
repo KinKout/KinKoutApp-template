@@ -1,0 +1,100 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:			Gain.h
+* Author:		KinKoutDSP
+* Date:			24-Aug-2026
+*
+* ================================================================================
+* 
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@
+* Author:		@COMPANY_NAME_T@
+* Date:			@BUILD_DATE_T@
+*
+* Project:		@PROJECT_NAME_T@
+* Class:		Gain
+*
+* Purpose:		Apply a smoothed linear gain controlled in decibels.
+*
+* ================================================================================
+*
+* Info:		Applies the same gain to every channel, modifying the buffer in-place.
+*			Accepts decibels and smooths changes in linear amplitude.
+*			Each instance has its own smoothing state and starts at unity gain.
+*			An optional atomic source supplies the target once per audio block.
+*			The source is borrowed, read-only to Gain, and must remain valid while
+*			bound.
+*			Sidechain and MIDI are ignored, a null audio buffer is skipped.
+*			Introduces no latency and produces no tail.
+*
+* Usage:	- Create a Gain object and call prepare() with a positive sample rate.
+*			   blockSize and numChannels are accepted but unused.
+*			- Choose how to supply the target in dB:
+*			   - Call setGainDecibels(value) for direct control.
+*			   - Call bindParameters(&atomicValue) to read an external source.
+*			     While bound, that source overrides direct control on each block.
+*			- Call process(&buffer, nullptr, nullptr) for each audio block.
+*			- Call reset() when an immediate jump to the existing target is needed.
+*			   To return to direct control, call bindParameters(nullptr).
+*
+*			Call prepare() again when the sample rate changes, it preserves the
+*			target and jumps to it. Change millisecondSmoothingTime to adjust the
+*			ramp duration, then prepare the object before processing.
+*			Do not call other methods that change this object's state concurrently
+*			with process(), or process the same instance from multiple threads.
+*			An independent atomic source may be updated concurrently by its owner.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_audio_basics/juce_audio_basics.h>
+
+
+class Gain
+{
+public:
+	Gain();
+	~Gain();
+
+	// -------------------------------------------------------------------------------- Main methods
+	void prepare (double sampleRate, int blockSize, int numChannels);
+
+	void process	(juce::AudioBuffer<float>* buffer,
+					const juce::AudioBuffer<float>* sidechain,
+					juce::MidiBuffer* midi);
+
+	// Cancel smoothing and jump to the existing target; keep the source binding.
+	void reset();
+
+	// -------------------------------------------------------------------------------- Processor timing
+	int getLatencySamples() const;
+
+	double getTailLengthSeconds() const;
+
+	// -------------------------------------------------------------------------------- Gain control
+	// Set a target in dB; smoothing takes place during process().
+	void setGainDecibels (float newGainDB);
+
+	// -------------------------------------------------------------------------------- Parameter source
+	// Bind or unbind a borrowed atomic dB source; this call does not read it.
+	// Passing nullptr keeps the existing target and enables direct control.
+	void bindParameters (std::atomic<float>* gainDbSource);
+
+private:
+	juce::SmoothedValue<float> smoothedGain { 1.0f };
+	const int millisecondSmoothingTime = 20; // Ramp duration, applied by prepare()
+	const double secondSmoothingTime = millisecondSmoothingTime * 0.001;
+
+	std::atomic<float>* gainParamDB = nullptr;
+
+	// ================================================================================
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Gain)
+};

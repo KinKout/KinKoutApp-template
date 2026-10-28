@@ -1,0 +1,215 @@
+/*
+* ================================================================================
+*
+* - Boilerplate from JUCE:
+*
+* File:			PluginProcessor.cpp
+* Author:		JUCE
+* Date:			25-Sep-2023
+*
+* See:			https://github.com/juce-framework/JUCE/blob/master/examples/CMake/AudioPlugin/PluginProcessor.cpp
+*
+* ================================================================================
+*
+* - Adaptation:
+*
+* Author:		KinKoutDSP
+* Date:			18-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Project:		@PROJECT_NAME_T@
+* Class:		@PROJECT_NAME_T@AudioProcessor
+*
+* Purpose:		Connect the JUCE processor callbacks to the parameters and DSP engine.
+* --------------------------------------------------------------------------------
+* 									PLUGIN INFO
+* --------------------------------------------------------------------------------
+* Plugin:		@PRODUCT_NAME_T@				Plugin code:		@PLUGIN_CODE_T@
+* Version:		@VERSION_T@
+* Date:			@BUILD_DATE_T@
+*
+* Description:	@DESCRIPTION_T@
+* --------------------------------------------------------------------------------
+* 									AUTHOR INFO
+* --------------------------------------------------------------------------------
+* Author:		@COMPANY_NAME_T@				Manufacturer code:	@MANUFACTURER_CODE_T@
+* Website:		@COMPANY_WEBSITE_T@
+* Email:		@COMPANY_EMAIL_T@
+*
+* ================================================================================ */
+
+
+#include "PluginProcessor.h"
+#include "PluginEditor.h"
+
+#include "engine/Parameters.h"
+
+
+@PROJECT_NAME_T@AudioProcessor::@PROJECT_NAME_T@AudioProcessor()
+#ifndef JucePlugin_PreferredChannelConfigurations
+	: AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+	.withInput("Input", juce::AudioChannelSet::stereo(), true)
+#if ENABLE_SIDECHAIN_BUS // --------------------------------------------------- External sidechain
+	.withInput("Sidechain", juce::AudioChannelSet::stereo(), true)
+#endif
+#endif
+	.withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+	),
+	apvts(*this, nullptr, "PARAMETERS", Parameters::createLayout()),
+	engine(instRack)
+#endif
+{
+	// Resolve the parameter IDs once and hand the raw pointers down the chain.
+	engine.bindParameters (Parameters::resolve (apvts));
+	setLatencySamples (engine.getLatencySamples());
+}
+
+@PROJECT_NAME_T@AudioProcessor::~@PROJECT_NAME_T@AudioProcessor() = default;
+
+// ================================================================================ Main processor
+
+void @PROJECT_NAME_T@AudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) // NOLINT(misc-const-correctness)
+{
+	// Use this method as the place to do any pre-playback
+	// initialisation that you need..
+
+	engine.prepare	(sampleRate,
+					samplesPerBlock,
+					juce::jmax(getTotalNumInputChannels(), getTotalNumOutputChannels()));
+
+	setLatencySamples (engine.getLatencySamples());
+}
+
+void @PROJECT_NAME_T@AudioProcessor::processBlock	(juce::AudioBuffer<float>& buffer,
+												juce::MidiBuffer& midiMessages)
+{
+	juce::ScopedNoDenormals noDenormals;
+
+#if ENABLE_SIDECHAIN_BUS
+	auto engineBuffer = getBusBuffer (buffer, true, 0);
+	const auto sidechain = getBusBuffer (buffer, true, 1);
+	engine.process (&engineBuffer, &sidechain, &midiMessages);
+#else
+	engine.process (&buffer, nullptr, &midiMessages);
+#endif
+
+}
+
+void @PROJECT_NAME_T@AudioProcessor::releaseResources()
+{
+	// When playback stops, you can use this as an opportunity to free up any
+	// spare memory, etc.
+
+	engine.reset();
+}
+
+bool @PROJECT_NAME_T@AudioProcessor::isBusesLayoutSupported(const BusesLayout& layouts) const
+{
+#if JucePlugin_IsMidiEffect
+	juce::ignoreUnused(layouts);
+	return true;
+#else
+	// This is the place where you check if the layout is supported.
+	// In this template code we only support mono or stereo.
+	// Some plugin hosts, such as certain GarageBand versions, will only
+	// load plugins that support stereo bus layouts.
+
+	if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+		&& layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+		return false;
+
+	// This checks if the input layout matches the output layout
+#if ! JucePlugin_IsSynth
+	if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+		return false;
+#endif
+
+	return true;
+#endif
+}
+
+// ================================================================================ Plugin info
+const juce::String @PROJECT_NAME_T@AudioProcessor::getName() const { return JucePlugin_Name; }
+
+double @PROJECT_NAME_T@AudioProcessor::getTailLengthSeconds() const
+{
+	return engine.getTailLengthSeconds();
+}
+
+bool @PROJECT_NAME_T@AudioProcessor::acceptsMidi() const
+{
+#if JucePlugin_WantsMidiInput
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool @PROJECT_NAME_T@AudioProcessor::producesMidi() const
+{
+#if JucePlugin_ProducesMidiOutput
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool @PROJECT_NAME_T@AudioProcessor::isMidiEffect() const
+{
+#if JucePlugin_IsMidiEffect
+	return true;
+#else
+	return false;
+#endif
+}
+
+// ================================================================================ Program info
+// NB: some hosts don't cope very well if you tell them there are 0 programs,
+// so this should be at least 1, even if you're not really implementing programs.
+int @PROJECT_NAME_T@AudioProcessor::getNumPrograms() { return 1; }
+int @PROJECT_NAME_T@AudioProcessor::getCurrentProgram() { return 0; }
+void @PROJECT_NAME_T@AudioProcessor::setCurrentProgram (int index) { juce::ignoreUnused (index); }
+const juce::String @PROJECT_NAME_T@AudioProcessor::getProgramName (int index) { juce::ignoreUnused (index); return {}; }
+void @PROJECT_NAME_T@AudioProcessor::changeProgramName (int index, const juce::String& newName) { juce::ignoreUnused (index, newName); }
+
+// ================================================================================ Editor processor
+bool @PROJECT_NAME_T@AudioProcessor::hasEditor() const { return ENABLE_EDITOR; }
+
+#if ENABLE_EDITOR
+	juce::AudioProcessorEditor* @PROJECT_NAME_T@AudioProcessor::createEditor() { return new @PROJECT_NAME_T@AudioProcessorEditor (*this); }
+#else
+	juce::AudioProcessorEditor* @PROJECT_NAME_T@AudioProcessor::createEditor() { return nullptr; }
+#endif
+
+// ================================================================================ State
+void @PROJECT_NAME_T@AudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+{
+	/* You should use this method to store your parameters in the memory block.
+	 * You could do that either as raw data, or use the XML or ValueTree classes
+	 * as intermediaries to make it easy to save and load complex data. */
+
+	juce::ignoreUnused (destData);
+}
+
+void @PROJECT_NAME_T@AudioProcessor::setStateInformation (const void* data, const int sizeInBytes)
+{
+	/* You should use this method to restore your parameters from this memory block,
+	 * whose contents will have been created by the getStateInformation() call. */
+
+	juce::ignoreUnused (data, sizeInBytes);
+}
+
+//============================================================================== Plugin instance
+// This creates new instances of the plugin..
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+	return new @PROJECT_NAME_T@AudioProcessor();
+}
