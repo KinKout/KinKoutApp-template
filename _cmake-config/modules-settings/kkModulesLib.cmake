@@ -2,16 +2,16 @@
 # KinKout Modules Configuration
 # ================================================================================
 #
-# File:     kkModulesLib.cmake
-# Author:   KinKout
-# Date:     11-May-2026
+# File:				kkModulesLib.cmake
+# Author:			KinKout
+# Date:				11-May-2026
 #
-# Purpose:  manage KinKout modules.
+# Purpose:		manage KinKout modules.
 #
 # ================================================================================
 #
 # This file contains the list of KinKoutDSP modules
-# used by this plugin.
+# used by this application.
 #
 # ================================================================================
 #
@@ -29,11 +29,10 @@
 set(_KK_NAMESPACE "kiko::")
 
 set(_KKML
-    # Add here custom library
-    # *** e.g. -> eg. yourNamespace::YourLib
-    # *** e.g. -> eg. third-party::third-party
-    
+	# Add here custom library
+	# *** e.g. -> eg. yourNamespace::YourLib
+	# *** e.g. -> eg. third-party::third-party
+
 #        kiko::KKAudioLibs
 )
-
 

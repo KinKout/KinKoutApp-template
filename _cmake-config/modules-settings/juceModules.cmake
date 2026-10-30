@@ -2,16 +2,22 @@
 # JUCE Modules Configuration
 # ================================================================================
 #
-# File:     juceModules.cmake
-# Author:   KinKout
-# Date:     11-May-2026
+# File:				juceModules.cmake
+# Author:			KinKout
+# Date:				28-Oct-2026
 #
-# Purpose:  manage Juce modules.
+# Purpose:		manage Juce modules.
 #
 # ================================================================================
 #
-# This file contains the list of JUCE modules used by this plugin.
-# Add or remove modules based to the plugin requirements.
+# This file contains the complete list of JUCE modules available to the application.
+# Set a module to AUTO, TRUE, or FALSE to control whether it is linked.
+#
+# AUTO  -> select the module according to the application type.
+# TRUE  -> always select the module.
+# FALSE -> never select the module directly.
+#
+# A disabled module may still be linked as a dependency of another JUCE module.
 #
 # ================================================================================
 #
@@ -19,55 +25,58 @@
 # Do not include KinKout modules here.
 #
 # See customModules.cmake for custom module configuration.
-# See kkModulesLib.cmake for KinKnout module configuration.
-#
+# See kkModulesLib.cmake for KinKout module configuration.
 #
 # ================================================================================
 
 
 # -------------------------------------------------------------------------------- Core audio modules
-set(JUCE_CORE_AUDIO_MODULES
-    juce::juce_audio_basics			    # AudioBuffer, sample management, basic MIDI helpers
-    juce::juce_audio_devices			# Audio I/O: input/output devices, driver management
-    juce::juce_audio_formats			# Audio file support: WAV, AIFF, FLAC, MP3
-    juce::juce_audio_plugin_client		# Plugin client support: VST3, AU, AAX, host integration
-    juce::juce_audio_processors			# Core plugin processing: parameters, buses, automations, processBlock
-    juce::juce_audio_utils			    # Audio playback, MIDI helpers, file player utilities
+set(JUCE_CORE_AUDIO_MODULES_LIST
+	"juce_audio_basics:AUTO"		# AudioBuffer, sample management, basic MIDI helpers
+	"juce_audio_devices:AUTO"		# Audio I/O: input/output devices, driver management
+	"juce_audio_formats:AUTO"		# Audio file support: WAV, AIFF, FLAC, MP3
+	"juce_audio_plugin_client:FALSE"		# Plugin client support: VST3, AU, AAX, host integration
+	"juce_audio_processors:AUTO"		# Core plugin processing: parameters, buses, automations, processBlock
+	"juce_audio_utils:AUTO"		# Audio playback, MIDI helpers, file player utilities
 )
 
 
 # -------------------------------------------------------------------------------- Core system modules
-set(JUCE_CORE_SYSTEM_MODULES
-    juce::juce_core				        # Core utilities: strings, containers, threads, timers, file system
-    juce::juce_data_structures			# PropertyTree, JSON/XML parsing, advanced data structures
-    juce::juce_events				    # Event handling, callbacks, listeners
+set(JUCE_CORE_SYSTEM_MODULES_LIST
+	"juce_core:AUTO"		# Core utilities: strings, containers, threads, timers, file system
+	"juce_data_structures:AUTO"		# PropertyTree, JSON/XML parsing, advanced data structures
+	"juce_events:AUTO"		# Event handling, callbacks, listeners
 )
 
 
 # -------------------------------------------------------------------------------- DSP modules
-set(JUCE_DSP_MODULES
-    # juce::juce_dsp				        # DSP classes: filters, LFOs, FFT, delay lines, modulation
+set(JUCE_DSP_MODULES_LIST
+	"juce_dsp:FALSE"		# DSP classes: filters, LFOs, FFT, delay lines, modulation
 )
 
 
 # -------------------------------------------------------------------------------- GUI modules
-set(JUCE_GUI_MODULES
-    juce::juce_graphics				    # 2D graphics: paths, gradients, images, bitmap rendering
-    juce::juce_gui_basics			    # Basic GUI components: windows, buttons, sliders, labels, panels
-    juce::juce_gui_extra			    # Advanced GUI components: treeview, listbox, tabbedComponent, drag/drop
+set(JUCE_GUI_MODULES_LIST
+	"juce_graphics:AUTO"		# 2D graphics: paths, gradients, images, bitmap rendering
+	"juce_gui_basics:AUTO"		# Basic GUI components: windows, buttons, sliders, labels, panels
+	"juce_gui_extra:AUTO"		# Advanced GUI components: treeview, listbox, tabbedComponent, drag/drop
 )
 
 
 # -------------------------------------------------------------------------------- Optional JUCE modules
-set(JUCE_OPTIONAL_MODULES
-    # juce::juce_analytics			    # Telemetry and usage analytics
-    # juce::juce_animation			    # GUI animation utilities, tweening, interpolations
-    # juce::juce_box2d				    # Physics engine wrapper for 2D simulations (Box2D)
-    # juce::juce_cryptography			# Cryptography: hashing, encryption, digital signatures
-    # juce::juce_javascript			    # Embedded JS engine (V8), for scripting inside the app
-    # juce::juce_opengl				    # OpenGL rendering in GUI components
-    # juce::juce_osc				    # Open Sound Control (OSC) support for networking & device control
-    # juce::juce_product_unlocking		# License management and product unlocking
-    # juce::juce_video				    # Video playback, frame management, video texture integration
-    # juce::juce_midi_ci			    # MIDI CoreMIDI support and advanced MIDI processing
+set(JUCE_OPTIONAL_MODULES_LIST
+	"juce_analytics:FALSE"		# Telemetry and usage analytics
+	"juce_animation:FALSE"		# GUI animation utilities, tweening, interpolations
+	"juce_box2d:FALSE"		# Physics engine wrapper for 2D simulations (Box2D)
+	"juce_cryptography:FALSE"		# Cryptography: hashing, encryption, digital signatures
+	"juce_javascript:FALSE"		# Embedded JavaScript interpreter
+	"juce_opengl:FALSE"		# OpenGL rendering in GUI components
+	"juce_osc:FALSE"		# Open Sound Control (OSC) support for networking and device control
+	"juce_product_unlocking:FALSE"		# License management and product unlocking
+	"juce_video:FALSE"		# Video playback and capture support
+	"juce_midi_ci:FALSE"		# MIDI Capability Inquiry support
 )
+
+
+# -------------------------------------------------------------------------------- Resolve module selection
+include(_cmake-config/_scripts/juceModulesManager.cmake)

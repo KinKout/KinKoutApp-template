@@ -9,5 +9,5 @@ cd "$(dirname "$0")"
 python3 OpenInCLion.py
 
 if [ $? -eq 0 ]; then
-    kill $PPID
+	kill $PPID
 fi

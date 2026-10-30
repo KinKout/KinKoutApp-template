@@ -1,0 +1,54 @@
+# ================================================================================
+# Application Configuration
+# ================================================================================
+#
+# File:				appConfig.cmake
+# Author:			KinKout
+# Date:				28-Oct-2026
+#
+# Purpose:		manage application data
+#
+# ================================================================================
+#
+# This file contains the application-specific metadata and main feature options
+# used by the build system. Configure it before the first CMake generation.
+#
+# The application type is a project-creation choice. Do not change it after the
+# source files have been generated.
+#
+# ================================================================================
+
+
+# -------------------------------------------------------------------------------- Application type
+# Implemented: GUI
+# Planned:     AUDIO
+# Future:      CONSOLE
+set(_APP_TYPE "GUI")
+string(TOUPPER "${_APP_TYPE}" _APP_TYPE)
+
+# -------------------------------------------------------------------------------- Info
+set(_PROJECT_NAME "MyNewApp") # !!! NO whitespace !!! - max 30 characters
+set(_PRODUCT_NAME "My New App") # Name displayed by the operating system - max 30 characters
+set(_DESCRIPTION "Something magna with elit something, officia something lorem ipsum with dolor and laboris commodo.") # max 255 characters
+set(_VERSION 1.0.0)
+
+# -------------------------------------------------------------------------------- Bundle ID
+# created from company name and application name
+# you can rename it as your need, eg. "com.mycompany.myapp" lowercase
+set(_BUNDLE_ID "com.${_COMPANY_NAME}.${_PRODUCT_NAME}")
+string(REPLACE " " "" _BUNDLE_ID "${_BUNDLE_ID}")
+string(TOLOWER "${_BUNDLE_ID}" _BUNDLE_ID)
+
+# -------------------------------------------------------------------------------- Application behaviour
+set(_ALLOW_MULTIPLE_INSTANCES TRUE)
+
+# -------------------------------------------------------------------------------- Optional capabilities
+set(_NEEDS_WEB_BROWSER FALSE)		# Disable web browser module
+set(_NEEDS_CURL FALSE)		# Disable CURL support
+set(_MICROPHONE_PERMISSION_ENABLED FALSE)
+set(_MICROPHONE_PERMISSION_TEXT "This application requires access to the microphone.")
+
+# -------------------------------------------------------------------------------- Audio profile options
+# Reserved for the AUDIO profile
+#set(_ENABLE_AUDIO_INPUT FALSE)
+#set(_ENABLE_MIDI_INPUT FALSE)
