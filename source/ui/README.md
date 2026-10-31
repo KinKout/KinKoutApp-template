@@ -3,10 +3,13 @@ ___
 #### This folder is for the user interface code.
 ___
 
-*CMake currently generates `MainWindow.h/cpp` and `MainComponent.h/cpp` in this folder
-for the `GUI` profile. The files are created during the first configuration and are
-not overwritten afterwards. They will also provide the graphical root for the future
-`AUDIO` profile.*
+*[This folder][link_ui] is planned to contain `MainComponent.h/cpp` as the root component for the reusable UI.
+  `AppComponent` will host it in both GUI and AUDIO applications, following the same graphical
+  organisation planned for KinKoutDSP-template, where it will be hosted by `PluginEditor`.*
+
+Only the folder structure is present in this version. No UI implementation files are generated here yet.
+`MainWindow` and the profile-specific `AppComponent` are generated directly in `source/`.
+The components described below are examples of the planned organisation.
 ___
 
 It is divided into 3 subfolders:

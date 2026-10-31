@@ -1,0 +1,75 @@
+/*
+* ================================================================================
+*
+* - Boilerplate from JUCE:
+*
+* File:				AppComponent.h
+* Author:			JUCE
+* Date:				25-Sep-2023
+*
+* See:				https://github.com/juce-framework/JUCE/blob/master/examples/CMake/GuiApp/MainComponent.h
+*
+* ================================================================================
+*
+* - Adaptation:
+*
+* Author:			KinKoutDSP
+* Date:				31-Oct-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Class:			AppComponent
+*
+* Purpose:			Provide the root component for the Audio application user interface.
+*
+* ================================================================================
+*
+* Info:		
+*
+* Usage:	
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <JuceHeader.h>
+
+
+//==============================================================================
+/*
+	This component lives inside our window, and this is where you should put all
+	your controls and content.
+*/
+class AppComponent  : public juce::AudioAppComponent
+{
+public:
+	//==============================================================================
+	AppComponent();
+	~AppComponent() override;
+
+	//==============================================================================
+	void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
+	void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
+	void releaseResources() override;
+
+	//==============================================================================
+	void paint (juce::Graphics& g) override;
+	void resized() override;
+
+private:
+	//==============================================================================
+	// Your private member variables go here...
+
+
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppComponent)
+};

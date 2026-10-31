@@ -21,8 +21,8 @@
 
 # -------------------------------------------------------------------------------- Application type
 # Implemented: GUI
-# Planned:     AUDIO
-# Future:      CONSOLE
+# Implemented: AUDIO
+# Future: CONSOLE
 set(_APP_TYPE "GUI")
 string(TOUPPER "${_APP_TYPE}" _APP_TYPE)
 
@@ -47,8 +47,3 @@ set(_NEEDS_WEB_BROWSER FALSE)		# Disable web browser module
 set(_NEEDS_CURL FALSE)		# Disable CURL support
 set(_MICROPHONE_PERMISSION_ENABLED FALSE)
 set(_MICROPHONE_PERMISSION_TEXT "This application requires access to the microphone.")
-
-# -------------------------------------------------------------------------------- Audio profile options
-# Reserved for the AUDIO profile
-#set(_ENABLE_AUDIO_INPUT FALSE)
-#set(_ENABLE_MIDI_INPUT FALSE)

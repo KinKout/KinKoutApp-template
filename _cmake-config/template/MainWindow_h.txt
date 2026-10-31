@@ -1,36 +1,75 @@
 /*
 * ================================================================================
 *
+* - Boilerplate from JUCE:
+*
 * File:				MainWindow.h
+* Author:			JUCE
+* Date:				02-Dec-2024
+*
+* See:				https://github.com/juce-framework/JUCE/blob/master/examples/CMake/GuiApp/Main.cpp
+*
+* ================================================================================
+*
+* - Adaptation:
+*
+* Author:			KinKoutDSP
+* Date:				31-Oct-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
 * Date:				@BUILD_DATE_T@
 *
-* Application:	@PRODUCT_NAME_T@
+* Project:			@PROJECT_NAME_T@
+* Class:			MainWindow
 *
-* Purpose:		Own the application's main content component.
+* Purpose:			Own the application's main window.
+*
+* ================================================================================
+*
+* Info:		
+*
+* Usage:	
 *
 * ================================================================================ */
 
 
 #pragma once
 
-#include <juce_gui_extra/juce_gui_extra.h>
+#include "juce_gui_basics/juce_gui_basics.h"
 
 
+// ================================================================================
+	/*
+		This class implements the desktop window that contains an instance of
+		our AppComponent class.
+	*/
 class MainWindow final : public juce::DocumentWindow
 {
 public:
-	explicit MainWindow (const juce::String& name);
+	MainWindow (const juce::String& name);
+
 	~MainWindow() override;
 
+	// ================================================================================
+	/* This is called when the user tries to close this window. Here, we'll just
+		ask the app to quit when this happens, but you can change this to do
+		whatever you need.
+	*/
 	void closeButtonPressed() override;
 
 	/* Note: Be careful if you override any DocumentWindow methods - the base
-	class uses a lot of them, so by overriding you might break its functionality.
-	It's best to do all your work in your content component instead, but if
-	you really have to override any DocumentWindow methods, make sure your
-	subclass also calls the superclass's method.
+		class uses a lot of them, so by overriding you might break its functionality.
+		It's best to do all your work in your content component instead, but if
+		you really have to override any DocumentWindow methods, make sure your
+		subclass also calls the superclass's method.
 	*/
-
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };

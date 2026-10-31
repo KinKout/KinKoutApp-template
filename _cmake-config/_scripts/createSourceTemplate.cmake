@@ -30,20 +30,27 @@ set(_N_TEMPLATE_LOADED 0)
 set(N_TEMPLATE_NOT_LOADED 0)
 
 set(_COMMON_TEMPLATE_FILES
-		"essential:source/ui:MainWindow_cpp"
-		"essential:source/ui:MainWindow_h"
-		"essential:source/ui:MainComponent_cpp"
-		"essential:source/ui:MainComponent_h"
+		"essential:source:Main_cpp"
+		"essential:source:MainWindow_cpp"
+		"essential:source:MainWindow_h"
 )
 
 set(_GUI_TEMPLATE_FILES
-		"essential:source:MainGuiApp_cpp"
+		"essential:source:GUIAppComponent_cpp"
+		"essential:source:GUIAppComponent_h"
+)
+
+set(_AUDIO_TEMPLATE_FILES
+		"essential:source:AUDIOAppComponent_cpp"
+		"essential:source:AUDIOAppComponent_h"
 )
 
 set(TEMPLATE_FILES ${_COMMON_TEMPLATE_FILES})
 
 if(_APP_TYPE STREQUAL "GUI")
 	list(APPEND TEMPLATE_FILES ${_GUI_TEMPLATE_FILES})
+elseif(_APP_TYPE STREQUAL "AUDIO")
+	list(APPEND TEMPLATE_FILES ${_AUDIO_TEMPLATE_FILES})
 endif()
 
 list(SORT TEMPLATE_FILES)
@@ -53,7 +60,9 @@ foreach(LIST ${TEMPLATE_FILES})
 	list(GET LIST 1 SUBDIR)
 	list(GET LIST 2 TEMPLATE)
 
-	string(REPLACE "_h" ".h" OUT_NAME "${TEMPLATE}")
+	get_filename_component(TEMPLATE_NAME "${TEMPLATE}" NAME)
+	string(REPLACE ${_APP_TYPE} "" OUT_NAME "${TEMPLATE_NAME}")
+	string(REPLACE "_h" ".h" OUT_NAME "${OUT_NAME}")
 	string(REPLACE "_cpp" ".cpp" OUT_NAME "${OUT_NAME}")
 
 	set(SOURCE_FILE "${_THIS_DIR}/${SUBDIR}/${OUT_NAME}")

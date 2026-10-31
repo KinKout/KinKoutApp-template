@@ -1,0 +1,65 @@
+/*
+* ================================================================================
+*
+* - Boilerplate from JUCE:
+*
+* File:				AppComponent.cpp
+* Author:			JUCE
+* Date:				18-Apr-2024
+*
+* See:				https://github.com/juce-framework/JUCE/blob/master/examples/CMake/GuiApp/MainComponent.cpp
+*
+* ================================================================================
+*
+* - Adaptation:
+*
+* Author:			KinKoutDSP
+* Date:				31-Oct-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Class:			AppComponent
+*
+* Purpose:			Provide the root component for the GUI application user interface.
+*
+* ================================================================================*/
+
+
+#include "AppComponent.h"
+
+//==============================================================================
+AppComponent::AppComponent()
+{
+	setSize (600, 400);
+}
+
+AppComponent::~AppComponent()
+{
+}
+
+//==============================================================================
+void AppComponent::paint (juce::Graphics& g)
+{
+	// (Our component is opaque, so we must completely fill the background with a solid colour)
+	g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+
+	g.setFont (juce::FontOptions (16.0f));
+	g.setColour (juce::Colours::white);
+	g.drawText ("Finalmente l'app GUI funziona!", getLocalBounds(), juce::Justification::centred, true);
+}
+
+void AppComponent::resized()
+{
+	// This is called when the AppComponent is resized.
+	// If you add any child components, this is where you should
+	// update their positions.
+}

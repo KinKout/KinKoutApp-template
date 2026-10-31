@@ -14,8 +14,8 @@ definePath.json
 
 # ---------- CODE
 
-*.h
-*.cpp
+#*.h
+#*.cpp
 
 # ---------- HIDDEN FILES
 
