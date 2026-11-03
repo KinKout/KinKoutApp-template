@@ -21,12 +21,13 @@ if(NOT _TYPE STREQUAL "GUI" AND NOT _TYPE STREQUAL "AUDIO")
 	message(FATAL_ERROR "Invalid _APP_TYPE '${_APP_TYPE}'. Expected GUI or AUDIO")
 endif()
 
-set(_AUTO_GROUPS CORE_SYSTEM GUI)
-if(_TYPE STREQUAL "AUDIO")
-	list(APPEND _AUTO_GROUPS CORE_AUDIO)
-endif()
-
 set(_VALID_STATES AUTO TRUE FALSE)
+
+# -------------------------------------------------------------------------------- Auto modules
+set(_AUTO_GROUPS CORE_SYSTEM GUI)				# default modules group for GUI and AUDIO applications
+if(_TYPE STREQUAL "AUDIO")
+	list(APPEND _AUTO_GROUPS CORE_AUDIO DSP)	# specific modules group for AUDIO applications
+endif()
 
 foreach(_GROUP IN ITEMS CORE_AUDIO CORE_SYSTEM DSP GUI OPTIONAL)
 	set(_INPUT "JUCE_${_GROUP}_MODULES_LIST")

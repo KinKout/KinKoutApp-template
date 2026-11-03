@@ -29,12 +29,13 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AppComponent
 *
-* Purpose:			Provide the root component for the GUI application user interface.
+* Purpose:		Provide the main content and user interface for the GUI application.
 *
 * ================================================================================*/
 
 
 #include "AppComponent.h"
+
 
 //==============================================================================
 AppComponent::AppComponent()

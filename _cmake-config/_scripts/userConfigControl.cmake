@@ -1,15 +1,15 @@
 # ================================================================================
-# Project name, product name, description, version, bundle ID, and boolean validation
+# User configuration control
 # ================================================================================
 #
-# File:				stringControl.cmake
+# File:				userConfigControl.cmake
 # Author:			KinKout
 # Date:				29-Oct-2026
 #
-# Purpose:		Strip, validate length and characters of "_PROJECT_NAME", "_PRODUCT_NAME",
-#						"_DESCRIPTION", "_VERSION", and "_BUNDLE_ID" variables using regular
-#						expressions. Validate boolean options from configuration files.
-#						Visit https://regex101.com/ for testing regular expressions
+# Purpose:		Normalise and validate user-defined configuration values,
+#					including application metadata, boolean options,
+#					and default audio channel counts.
+#					visit https://regex101.com/ for testing regular expressions
 #
 # ================================================================================
 
@@ -46,6 +46,18 @@ function(check_name_length _VAR_NAME _STRING _MAX_LENGTH )
 				"- \"${_N_CHAR}\" characters in \"${_VAR_NAME}\" -> \"${_STRING}\"\n"
 				"- max length -> ${_MAX_LENGTH}\n"
 				"- Check the variable in \"_cmake-config/appConfig.cmake\" file\n")
+	endif()
+endfunction()
+
+# -------------------------------------------------------------------------------- Check number of audio channels
+function(check_num_channels _VAR_NAME _VALUE _CONFIG_FILE)
+
+	if(NOT "${_VALUE}" MATCHES "^[0-9]+$")
+		build_failure_msg()
+		message(FATAL_ERROR
+				"- Invalid channel value in \"${_VAR_NAME}\" -> \"${_VALUE}\"\n"
+				"- Allowed values -> non negative integers\n"
+				"- Check the variable in \"${_CONFIG_FILE}\" file\n")
 	endif()
 endfunction()
 
@@ -116,4 +128,11 @@ check_boolean(_ALLOW_MULTIPLE_INSTANCES "${_ALLOW_MULTIPLE_INSTANCES}" "_cmake-c
 check_boolean(_NEEDS_WEB_BROWSER "${_NEEDS_WEB_BROWSER}" "_cmake-config/appConfig.cmake")
 check_boolean(_NEEDS_CURL "${_NEEDS_CURL}" "_cmake-config/appConfig.cmake")
 check_boolean(_MICROPHONE_PERMISSION_ENABLED "${_MICROPHONE_PERMISSION_ENABLED}" "_cmake-config/appConfig.cmake")
+check_boolean(_WANTS_MIDI_INPUT "${_WANTS_MIDI_INPUT}" "_cmake-config/appConfig.cmake")
+check_boolean(_PRODUCES_MIDI_OUTPUT "${_PRODUCES_MIDI_OUTPUT}" "_cmake-config/appConfig.cmake")
 check_boolean(_HARDENED_RUNTIME_ENABLED "${_HARDENED_RUNTIME_ENABLED}" "_cmake-config/notarisation/notarisation.cmake")
+
+# -------------------------------------------------------------------------------- Check number of audio channels:
+
+check_num_channels(_DEFAULT_AUDIO_INPUT_CHANNELS "${_DEFAULT_AUDIO_INPUT_CHANNELS}" "_cmake-config/appConfig.cmake")
+check_num_channels(_DEFAULT_AUDIO_OUTPUT_CHANNELS "${_DEFAULT_AUDIO_OUTPUT_CHANNELS}" "_cmake-config/appConfig.cmake")

@@ -7,17 +7,19 @@ CMake generates the source files here from the templates in `_cmake-config/templ
 Existing files are left unchanged, so you can edit them to develop your application.
 `Main.cpp`, `MainWindow.h/cpp` and `AppComponent.h/cpp` are generated directly in this folder.
 `Main` and `MainWindow` are shared by both application profiles. The `AppComponent` implementation
-is selected before the first configuration: it inherits from `juce::Component` for `GUI`
-or `juce::AudioAppComponent` for `AUDIO`.
+is selected before the first configuration. Both implementations inherit from `juce::Component`:
+the GUI version provides the graphical application root, while the AUDIO version owns the generated
+`AudioAppProcessor` and connects it to the system audio device through `AudioProcessorPlayer`.
+The audio buses use the default input and output channel values configured in `appConfig.cmake`.
 
 It is divided into 5 subfolders:
 
 - **assets-helper** - for helper code that loads or provides access to assets *(audio, data, fonts, images, etc.)*
 - **core** - for shared constants, math functions and utilities, including code for communication between the audio and UI threads.
-- **dsp** - for reusable audio processing code used by the `AUDIO` profile, divided into 9 subfolders
+- **dsp** - for reusable audio-processing code used by the `AUDIO` profile, divided into 9 subfolders
 	- amplitude, analysis, distortion, dynamics, filters, generators, modulation, time, utility. *(See [dsp/README.md][link_dsp_readme].)*
 - **engine** - reserved for audio-engine and processing-chain code used by the `AUDIO` profile.
-  Integration with the processing structure of KinKoutDSP-template is planned; no engine source files are generated yet.
+	- `AudioAppProcessor` currently provides the processing root directly in `source/` and generates a 440 Hz sine wave at -20 dBFS as an audio-output test. Integration with the complete processing structure of KinKoutDSP-template is planned; no engine source files are generated yet.
 - **ui** - for reusable user interface code divided into 3 subfolders
 	- components, shared-parts, style. *(See [ui/README.md][link_ui_readme].)*
 	- These folders are reserved for the planned UI structure. `MainComponent` will compose the graphical interface and will be hosted by `AppComponent`.

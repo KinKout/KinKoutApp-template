@@ -20,10 +20,11 @@
 
 
 # -------------------------------------------------------------------------------- Application type
+# use one of the application types below to setup _APP_TYPE variable:
 # Implemented: GUI
 # Implemented: AUDIO
 # Future: CONSOLE
-set(_APP_TYPE "GUI")
+set(_APP_TYPE "AUDIO")
 string(TOUPPER "${_APP_TYPE}" _APP_TYPE)
 
 # -------------------------------------------------------------------------------- Info
@@ -45,5 +46,15 @@ set(_ALLOW_MULTIPLE_INSTANCES TRUE)
 # -------------------------------------------------------------------------------- Optional capabilities
 set(_NEEDS_WEB_BROWSER FALSE)		# Disable web browser module
 set(_NEEDS_CURL FALSE)		# Disable CURL support
+
+# -------------------------------------------------------------------------------- Audio settings
+set(_DEFAULT_AUDIO_INPUT_CHANNELS 0)
+set(_DEFAULT_AUDIO_OUTPUT_CHANNELS 2)
+# Enable microphone permission when the application uses audio input channels.
 set(_MICROPHONE_PERMISSION_ENABLED FALSE)
 set(_MICROPHONE_PERMISSION_TEXT "This application requires access to the microphone.")
+
+# -------------------------------------------------------------------------------- MIDI settings
+# MIDI device handling is not implemented yet. Keep both options set to FALSE.
+set(_WANTS_MIDI_INPUT FALSE)
+set(_PRODUCES_MIDI_OUTPUT FALSE)

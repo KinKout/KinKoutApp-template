@@ -3,13 +3,13 @@ ___
 #### This folder is for reusable audio processing modules.
 ___
 
-*The `AUDIO` profile is still under development. CMake does not currently generate DSP source files in [this folder][link_dsp].*
+*The `AUDIO` profile is still under development. Its test oscillator is currently implemented directly in `AudioAppProcessor`; CMake does not generate reusable DSP source files in [this folder][link_dsp].*
 
 *The category folders are reserved for the future audio application structure and for user DSP modules.*
 ___
 
 It is divided into 9 category folders for the following types of modules. These are examples of what belongs
-in each category; no DSP example is currently provided by the templates.
+in each category; no reusable DSP module is currently provided by the templates.
 
 - **amplitude** - *amplitudes and their ratios:*
 	- gain

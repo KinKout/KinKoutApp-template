@@ -29,13 +29,16 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			MainWindow
 *
-* Purpose:			Own the application's main window.
+* Purpose:		Provide the application's main window and hold AppComponent
+*				as its content.
 *
 * ================================================================================
 *
-* Info:		
+* Info:		Main.cpp creates this window when the application starts. The window
+*			shows AppComponent and closes the application when the user closes it.
 *
-* Usage:	
+* Usage:	Add the application content in AppComponent. Change this class only
+*			when you need to configure the main window.
 *
 * ================================================================================ */
 

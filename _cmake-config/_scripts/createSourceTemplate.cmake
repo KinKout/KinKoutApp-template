@@ -43,6 +43,8 @@ set(_GUI_TEMPLATE_FILES
 set(_AUDIO_TEMPLATE_FILES
 		"essential:source:AUDIOAppComponent_cpp"
 		"essential:source:AUDIOAppComponent_h"
+		"essential:source:AUDIOAudioAppProcessor_cpp"
+		"essential:source:AUDIOAudioAppProcessor_h"
 )
 
 set(TEMPLATE_FILES ${_COMMON_TEMPLATE_FILES})

@@ -27,9 +27,10 @@
 * Date:				@BUILD_DATE_T@
 *
 * Project:			@PROJECT_NAME_T@
-* Class:			MainWindows
+* Class:			MainWindow
 *
-* Purpose:			Own the application's main window.
+* Purpose:		Provide the application's main window and hold AppComponent
+*				as its content.
 *
 * ================================================================================*/
 
@@ -48,12 +49,8 @@ MainWindow::MainWindow (const juce::String& name)
 	setUsingNativeTitleBar (true);
 	setContentOwned (new AppComponent(), true);
 
-	#if JUCE_IOS || JUCE_ANDROID
-		setFullScreen (true);
-	#else
-		setResizable (true, true);
-		centreWithSize (getWidth(), getHeight());
-	#endif
+	setResizable (true, true);
+	centreWithSize (getWidth(), getHeight());
 
 	Component::setVisible (true);
 }

@@ -29,13 +29,15 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AppComponent
 *
-* Purpose:			Provide the root component for the GUI application user interface.
+* Purpose:		Provide the main content and user interface for the GUI application.
 *
 * ================================================================================
 *
-* Info:		
+* Info:		MainWindow owns this component and shows it as the window content.
+*			This is the main place for the application controls and layout.
 *
-* Usage:	
+* Usage:	Add child components as class members and configure them in the constructor.
+*			Draw custom graphics in paint() and position the components in resized().
 *
 * ================================================================================ */
 

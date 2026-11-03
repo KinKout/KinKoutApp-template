@@ -29,13 +29,17 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AppComponent
 *
-* Purpose:			Provide the root component for the Audio application user interface.
+* Purpose:		Connect the application window, audio device,
+*				and AudioAppProcessor.
 *
 * ================================================================================
 *
-* Info:		
+* Info:		MainWindow uses this component as its content.
+*			The class creates the audio processor, opens the audio device,
+*			and connects them with AudioProcessorPlayer.
 *
-* Usage:	
+* Usage:	Add interface components here and put audio processing code in
+*			AudioAppProcessor. The audio device starts and stops automatically.
 *
 * ================================================================================ */
 
@@ -44,13 +48,15 @@
 
 #include <JuceHeader.h>
 
+#include "AudioAppProcessor.h"
+
 
 //==============================================================================
 /*
 	This component lives inside our window, and this is where you should put all
 	your controls and content.
 */
-class AppComponent  : public juce::AudioAppComponent
+class AppComponent  : public juce::Component
 {
 public:
 	//==============================================================================
@@ -58,17 +64,16 @@ public:
 	~AppComponent() override;
 
 	//==============================================================================
-	void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-	void getNextAudioBlock (const juce::AudioSourceChannelInfo& bufferToFill) override;
-	void releaseResources() override;
-
-	//==============================================================================
 	void paint (juce::Graphics& g) override;
 	void resized() override;
 
 private:
 	//==============================================================================
-	// Your private member variables go here...
+	void initialiseAudio (int numInputChannels);
+
+	AudioAppProcessor audioProcessor;
+	juce::AudioProcessorPlayer processorPlayer;
+	juce::AudioDeviceManager deviceManager;
 
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppComponent)

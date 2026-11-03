@@ -10,9 +10,9 @@ Born from [KinKoutDSP-template][link_kk_dsp_template], this project keeps the sa
 The template currently creates:
 
 - `GUI` - a generic JUCE graphical desktop application.
-- `AUDIO` - a JUCE desktop audio application based on `juce::AudioAppComponent`, with audio-device setup and empty processing callbacks that clear the output buffer.
+- `AUDIO` - a JUCE desktop audio application where `AppComponent` connects the audio device to an `AudioAppProcessor` based on `juce::AudioProcessor`.
 
-Both types share the same entry point and window, with a type-specific `AppComponent` implementation. DSP, parameter management and integration with the plugin template are not yet included. `CONSOLE` is planned as a future extension.
+Both types share the same entry point and window, with a type-specific `AppComponent` implementation. The AUDIO profile currently generates a 440 Hz sine wave at -20 dBFS as an audio-output test. Reusable DSP, parameter management, MIDI device handling, and the complete processing structure of the plugin template are not yet included. `CONSOLE` is planned as a future extension.
 
 - Edit one main configuration file for each new project:
 	- [appConfig.cmake][link_appConfig] with the application type, name, version and main options.
@@ -43,7 +43,7 @@ ___
 
 - **Generates the source files**
 	There are two types of source code templates: ‘essential’ and ‘optional’.
-	During the first CMake configuration, `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` are created in `source/` from the .txt files in the [template][link_template] folder using the application settings.
+	During the first CMake configuration, `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` are created in `source/` from the .txt files in the [template][link_template] folder using the application settings. The AUDIO profile also creates `AudioAppProcessor.h/.cpp`.
 	The generator selects the `GUIAppComponent_*` or `AUDIOAppComponent_*` templates and removes the application-type prefix from the generated filenames. Both profiles therefore use the same `AppComponent` name, without a factory or a C++ conditional for selecting the application type.
 
 	The ‘essential’ source files are automatically recreated if missing.
@@ -83,7 +83,7 @@ ___
 3. Duplicate `companyInfoExample.cmake` and rename it `companyInfo.cmake`.
    Here you can set your company data.
 4. Edit `appConfig.cmake` with the main settings before the first CMake configuration.
-   Choose `GUI` or `AUDIO` and configure the project name, product name, version, description, and main options.
+   Choose `GUI` or `AUDIO` and configure the project name, product name, version, description, and main options. For an AUDIO application, also configure the default input and output channels and the related microphone permission. MIDI device handling is not implemented yet, so its options must remain disabled.
 5. In the project root folder, run the launcher for your platform:
 
    - Double-click `OpenProject_Mac.command` on macOS.
@@ -124,7 +124,11 @@ ___
 	- [engine][link_engine]: reserved for audio-engine and DSP-chain management;
 	- [ui][link_ui]: reusable graphical components, shared parts and visual style.
 
-Both types generate `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` directly in `source/`. `Main` manages the application lifecycle; `MainWindow` owns `AppComponent`. The GUI implementation inherits from `juce::Component`, while the AUDIO implementation inherits from `juce::AudioAppComponent`. A reusable graphical `MainComponent` is not generated at this stage.
+Both types generate `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` directly in `source/`.
+`Main` manages the application lifecycle; `MainWindow` owns `AppComponent`.
+Both `AppComponent` implementations inherit from `juce::Component`. The GUI implementation provides the graphical application root. The AUDIO implementation owns `AudioAppProcessor`, `AudioProcessorPlayer` and `AudioDeviceManager`, connecting the processor to the system audio device.
+`AudioAppProcessor` defines its input and output buses from `appConfig.cmake` and provides the JUCE processor callbacks used for the application DSP.
+A reusable graphical `MainComponent` and the complete processing structure inherited from KinKoutDSP-template are not generated at this stage.
 
 ___
 ## Notes
@@ -138,17 +142,17 @@ The project is built with the JUCE CMake API, platform testing, trial and error,
 `OpenInCLion.py` started as an AI-generated draft that I reviewed and reworked.
 
 ___
-## License
+## Licence
 
 This template’s own code — the CMake build system, the Python launcher, the structure — is MIT-licensed.
-  See [LICENSE][link_mit_license].
+  See [LICENCE][link_mit_licence].
 
 The main entry point templates in `_cmake-config/template/` derive from the JUCE examples [boilerplate][link_juce_boilerplate],
-Copyright (c) Raw Material Software Limited, licensed under the [ISC License][link_isc_license].
+Copyright (c) Raw Material Software Limited, licensed under the [ISC Licence][link_isc_licence].
 
-JUCE itself is not included here. Applications built with this template link against JUCE, which is dual-licensed under the [AGPLv3][link_agplv3_license] and the commercial [JUCE license][link_juce_license].
+JUCE itself is not included here. Applications built with this template link against JUCE, which is dual-licensed under the [AGPLv3][link_agplv3_licence] and the commercial [JUCE licence][link_juce_licence].
 
-Choosing a license for an application created with this template remains the responsibility of that application's author.
+Choosing a licence for an application created with this template remains the responsibility of that application's author.
 
 
 
@@ -156,10 +160,10 @@ Choosing a license for an application created with this template remains the res
 [link_kk_dsp_template]: https://github.com/KinKout/KinKoutDSP-template
 [link_juce_download]: https://juce.com/download
 [link_juce_boilerplate]: https://github.com/juce-framework/JUCE/tree/master/examples/CMake/GuiApp
-[link_mit_license]: https://github.com/KinKout/KinKoutApp-template/tree/main/LICENSE
-[link_isc_license]: https://www.isc.org/licenses
-[link_agplv3_license]: https://www.gnu.org/licenses/agpl-3.0
-[link_juce_license]: https://juce.com/legal/
+[link_mit_licence]: https://github.com/KinKout/KinKoutApp-template/tree/main/LICENSE
+[link_isc_licence]: https://www.isc.org/licenses
+[link_agplv3_licence]: https://www.gnu.org/licenses/agpl-3.0
+[link_juce_licence]: https://juce.com/legal/
 
 
 [link_companyInfo]: https://github.com/KinKout/KinKoutApp-template/tree/main/_cmake-config/companyInfoExample.cmake

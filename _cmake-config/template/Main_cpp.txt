@@ -25,7 +25,7 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			@PROJECT_NAME_T@Application
 *
-* Purpose:			Define the JUCE application entry point and lifecycle.
+* Purpose:		Manage the JUCE application lifecycle and own its main window.
 * --------------------------------------------------------------------------------
 * 									APP INFO
 * --------------------------------------------------------------------------------
@@ -43,9 +43,11 @@
 *
 * ================================================================================
 *
-* Info:		
+* Info:		JUCE uses this class to start and close the application. The class
+*			creates MainWindow and handles quit requests and multiple instances.
 *
-* Usage:	
+* Usage:	Add startup code in initialise() and cleanup code in shutdown(). Change
+*			the other methods only when the application needs a different behaviour.
 *
 * ================================================================================ */
 

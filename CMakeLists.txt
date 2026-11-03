@@ -23,6 +23,7 @@ message("\n"
 include(_cmake-config/companyInfo.cmake)
 include(_cmake-config/appConfig.cmake)
 include(_cmake-config/modules-settings/juceModules.cmake)
+include(_cmake-config/_scripts/juceModulesManager.cmake)
 include(_cmake-config/modules-settings/kkModulesLib.cmake)
 include(_cmake-config/modules-settings/customModules.cmake)
 include(_cmake-config/_scripts/pathConfig.cmake)
@@ -70,7 +71,7 @@ message(STATUS "Platform detected: ${_SYSTEM_NAME}\n")
 # APPLICATION CONFIGURATION VALIDATION
 # ================================================================================
 
-include(_cmake-config/_scripts/stringControl.cmake)
+include(_cmake-config/_scripts/userConfigControl.cmake)
 
 message(STATUS
 		"Building:\n"
@@ -305,7 +306,16 @@ target_compile_definitions(
 	JUCE_APPLICATION_NAME_STRING="$<TARGET_PROPERTY:${_PROJECT_NAME},JUCE_PRODUCT_NAME>"
 	JUCE_APPLICATION_VERSION_STRING="$<TARGET_PROPERTY:${_PROJECT_NAME},JUCE_VERSION>"
 )
-
+if(_APP_TYPE STREQUAL "AUDIO")
+	target_compile_definitions(
+		${_PROJECT_NAME}
+		PUBLIC
+		KINKOUT_APP_DEFAULT_AUDIO_INPUT_CHANNELS=${_DEFAULT_AUDIO_INPUT_CHANNELS}
+		KINKOUT_APP_DEFAULT_AUDIO_OUTPUT_CHANNELS=${_DEFAULT_AUDIO_OUTPUT_CHANNELS}
+		KINKOUT_APP_WANTS_MIDI_INPUT=$<BOOL:${_WANTS_MIDI_INPUT}>
+		KINKOUT_APP_PRODUCES_MIDI_OUTPUT=$<BOOL:${_PRODUCES_MIDI_OUTPUT}>
+	)
+endif()
 
 # ================================================================================
 # TARGET LINK LIBRARIES
