@@ -1,0 +1,73 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				Parameters.cpp
+* Author:			KinKoutDSP
+* Date:				04-Nov-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Namespace:		Parameters
+*
+* Purpose:		Define the APVTS parameter layout and resolve its value pointers.
+*
+* ================================================================================ */
+
+
+#include "Parameters.h"
+
+juce::AudioProcessorValueTreeState::ParameterLayout Parameters::createLayout()
+{
+	juce::AudioProcessorValueTreeState::ParameterLayout layout;
+
+	// -------------------------------------------------------------------------------- 3. Define APVTS layout
+	// layout.add (std::make_unique<juce::AudioParameterFloat> (			// ~~~~~~~~ reference
+	// 	 dspModule_paramID,													// ParameterID
+	// 	 "DSP Module Param",												// display name (free to change)
+	// 	 juce::NormalisableRange (-20.0f, 20.0f, 0.01f),
+	// 	 0.0f));
+	juce::NormalisableRange<float> frequencyRange { 20.0f, 20000.0f, 0.01f };
+	frequencyRange.setSkewForCentre (1000.0f);
+	layout.add (std::make_unique<juce::AudioParameterFloat> (				// ^^^^^^^^ example, disposable
+		oscFrequency_paramID,
+		"Frequency",
+		frequencyRange,
+		440.0f,
+		juce::AudioParameterFloatAttributes().withLabel ("Hz")));
+
+	layout.add (std::make_unique<juce::AudioParameterFloat> (				// ^^^^^^^^ example, disposable
+		 gainOut_paramID,													// ParameterID
+		 "Output Gain",														// display name (free to change)
+		 juce::NormalisableRange (-60.0f, 20.0f, 0.01f),
+		 0.0f,
+		 juce::AudioParameterFloatAttributes().withLabel ("dB")));
+
+	return layout;
+}
+
+
+Parameters::RawPointers Parameters::resolve (const juce::AudioProcessorValueTreeState& apvts)
+{
+	RawPointers ptrs;
+
+	// -------------------------------------------------------------------------------- 4. Resolve the IDs
+	// ptrs.dspModule_valuePtr												// ~~~~~~~~ reference
+	// = apvts.getRawParameterValue (dspModule_paramID.getParamID());
+	ptrs.oscFrequency_valuePtr												// ^^^^^^^^ example, disposable
+	= apvts.getRawParameterValue (oscFrequency_paramID.getParamID());
+	ptrs.gainOut_valuePtr													// ^^^^^^^^ example, disposable
+	= apvts.getRawParameterValue (gainOut_paramID.getParamID());
+
+	return ptrs;
+}

@@ -1,0 +1,47 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				_Amplitude.h
+* Author:			KinKoutDSP
+* Date:				24-Aug-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+*
+* Purpose:		Collect the enabled amplitude-processing module headers.
+*
+* ================================================================================
+*
+* Info:		The Amplitude category umbrella header.
+*			Included through _Dsp.h.
+*			Including a module makes its definition available.
+*			InstRack creates and owns the instances, DspController runs them.
+*
+* Usage:	To expose a new amplitude module:
+*			- Add its .h/.cpp files to this category folder.
+*			- Add its #include below, following the reference entry.
+*			- Mount an instance in InstRack and wire it in DspController.
+*
+*			Keep the folder flat, if related files need a subfolder, adjust the
+*			include path here to match.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+
+// -------------------------------------------------------------------------------- Classes
+// #include "DspModule.h"												// ~~~~~~~~ reference
+#include "Gain.h"													// ^^^^^^^^ example, disposable

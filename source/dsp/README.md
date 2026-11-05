@@ -3,13 +3,19 @@ ___
 #### This folder is for reusable audio processing modules.
 ___
 
-*The `AUDIO` profile is still under development. Its test oscillator is currently implemented directly in `AudioAppProcessor`; CMake does not generate reusable DSP source files in [this folder][link_dsp].*
+The `AUDIO` profile generates its reusable DSP source files in [this folder][link_dsp] during the
+first CMake configuration. `Gain` and `Oscillator` are optional example modules. After the first
+configuration, you can use or delete them and they will not be generated again. Set
+`_OPTIONAL_SOURCE_LOADED` back to `FALSE` in `_cmake-config/_scripts/createSourceTemplate.cmake`
+if you need to generate them again.
 
-*The category folders are reserved for the future audio application structure and for user DSP modules.*
+The category folders contain the generated example modules and provide space for user DSP modules.
+If you remove an example module, also remove its include, rack instance, controller calls and parameters.
 ___
 
-It is divided into 9 category folders for the following types of modules. These are examples of what belongs
-in each category; no reusable DSP module is currently provided by the templates.
+It is divided into 9 category folders for the following types of modules. The current template
+provides Gain in the amplitude category and Oscillator in the generators category. The other entries
+are examples of modules that can be added later.
 
 - **amplitude** - *amplitudes and their ratios:*
 	- gain

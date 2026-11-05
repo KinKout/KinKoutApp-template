@@ -49,14 +49,14 @@
 
 
 // ================================================================================
-	/*
-		This class implements the desktop window that contains an instance of
-		our AppComponent class.
-	*/
+/*
+	This class implements the desktop window that contains an instance of
+	our AppComponent class.
+*/
 class MainWindow final : public juce::DocumentWindow
 {
 public:
-	MainWindow (const juce::String& name);
+	explicit MainWindow (const juce::String& name);
 
 	~MainWindow() override;
 
@@ -74,5 +74,6 @@ public:
 		subclass also calls the superclass's method.
 	*/
 private:
+	// ================================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
 };

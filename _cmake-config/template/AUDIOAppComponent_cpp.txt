@@ -29,20 +29,26 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AppComponent
 *
-* Purpose:		Connect the application window, audio device,
-*				and AudioAppProcessor.
+* Purpose:		Connect the audio device and processor and own the selected UI.
 *
 * ================================================================================*/
 
 
 #include "AppComponent.h"
+//#include "ui/MainComponent.h"
 
 
 //==============================================================================
 AppComponent::AppComponent()
 {
-	// Make sure you set the size of the component after
-	// you add any child components.
+#if USE_GENERIC_EDITOR
+	editorUI = std::make_unique<juce::GenericAudioProcessorEditor> (audioProcessor);
+#else
+	// TODO: implement MainComponent class for custom UI components
+	// editorUI = std::make_unique<MainComponent>();
+#endif
+
+	addAndMakeVisible (*editorUI);
 	setSize (600, 400);
 
 	processorPlayer.setProcessor (&audioProcessor);
@@ -96,16 +102,11 @@ void AppComponent::paint (juce::Graphics& g)
 
 	g.setFont (juce::FontOptions (16.0f));
 	g.setColour (juce::Colours::white);
-	g.drawText ("Finalmente l'app AUDIO funziona!", getLocalBounds(), juce::Justification::centred, true);
-	g.drawText ("Sine wave a 440Hz, -20dB",
-		juce::Rectangle<int>(0, getHeight()/2, getWidth(), getHeight()/2),
-		juce::Justification::centred,
-		true);
+	juce::Rectangle<int> text (0, 0, getWidth(), getHeight() / 2);
+	g.drawText ("Finalmente l'app AUDIO funziona!", text, juce::Justification::centred, true);
 }
 
 void AppComponent::resized()
 {
-	// This is called when the MainContentComponent is resized.
-	// If you add any child components, this is where you should
-	// update their positions.
+	editorUI->setBounds (0, getHeight() / 2, getWidth(), getHeight() / 2);
 }

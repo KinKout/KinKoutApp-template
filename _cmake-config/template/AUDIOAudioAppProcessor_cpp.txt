@@ -29,16 +29,22 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AudioAppProcessor
 *
-* Purpose:		Connect the JUCE processor callbacks to the application DSP.
+* Purpose:		Connect the JUCE processor callbacks to parameters and the DSP engine.
 *
 * ================================================================================ */
 
 
 #include "AudioAppProcessor.h"
+#include "engine/Parameters.h"
 
 
 juce::AudioProcessor::BusesProperties AudioAppProcessor::createBusesProperties()
 {
+	// The channel counts come from appConfig.cmake as compile definitions.
+	// A bus is added only when its channel count is greater than zero.
+	// This supports layouts with an input bus, an output bus, or both.
+	// The current DSP chain still needs an output bus to run.
+	// canonicalChannelSet() selects the standard JUCE layout for that channel count.
 	auto buses = BusesProperties{};
 
 #if KINKOUT_APP_DEFAULT_AUDIO_INPUT_CHANNELS > 0
@@ -61,10 +67,13 @@ juce::AudioProcessor::BusesProperties AudioAppProcessor::createBusesProperties()
 }
 
 AudioAppProcessor::AudioAppProcessor()
-	: AudioProcessor (createBusesProperties())
+	: AudioProcessor (createBusesProperties()),
+	  apvts (*this, nullptr, "PARAMETERS", Parameters::createLayout()),
+	  engine (instRack)
 {
-	oscillator.initialise ([] (float angle) { return std::sin (angle); }, oscillatorTableSize);
-	oscillator.setFrequency (testFrequency);
+	// Resolve the parameter IDs once and hand the raw pointers down the chain.
+	engine.bindParameters (Parameters::resolve (apvts));
+	setLatencySamples (engine.getLatencySamples());
 }
 
 AudioAppProcessor::~AudioAppProcessor() = default;
@@ -72,67 +81,47 @@ AudioAppProcessor::~AudioAppProcessor() = default;
 // ================================================================================ Main processor
 void AudioAppProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-	// Use this method as the place to do any pre-playback
-	// initialisation that you need..
-
-	const juce::dsp::ProcessSpec processSpec
-	{
-		sampleRate,
-		static_cast<juce::uint32> (samplesPerBlock),
-		oscillatorChannels
-	};
-
-	oscillator.prepare (processSpec);
+	engine.prepare (sampleRate,
+		samplesPerBlock,
+		getTotalNumOutputChannels());
+	setLatencySamples (engine.getLatencySamples());
 }
 
 void AudioAppProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 									  juce::MidiBuffer& midiMessages)
 {
-	juce::ignoreUnused (midiMessages);
-
 	juce::ScopedNoDenormals noDenormals;
-	auto totalNumInputChannels  = getTotalNumInputChannels();
-	auto totalNumOutputChannels = getTotalNumOutputChannels();
+	const int outputChannels = getTotalNumOutputChannels();
+	const int inputChannels = getTotalNumInputChannels();
 
-	const auto bufferNumSamples = buffer.getNumSamples();
+	for (int channel = inputChannels; channel < outputChannels; ++channel)
+		buffer.clear (channel, 0, buffer.getNumSamples());
 
-	// In case we have more outputs than inputs, this code clears any output
-	// channels that didn't contain input data, (because these aren't
-	// guaranteed to be empty - they may contain garbage).
-	// This is here to avoid people getting screaming feedback
-	// when they first compile the application, but obviously you don't need to keep
-	// this code if your algorithm always overwrites all the output channels.
-	for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-		buffer.clear (i, 0, bufferNumSamples);
-
-	// This is the place where you'd normally do the guts of your application
-	// audio processing...
-	// Make sure to reset the state if your inner loop is processing
-	// the samples and the outer loop is handling the channels.
-	// Alternatively, you can process the samples with the channels
-	// interleaved by keeping the same state.
-
-	// Generate the test signal only when an output is available, while allowing
-	// input-only applications to continue processing the incoming audio.
-	if (totalNumOutputChannels > 0)
+	// This template uses an oscillator followed by a gain.
+	// The DSP chain runs only when at least one output channel is available.
+	// getBusBuffer() gets the first output bus. Engine processes its buffer.
+	if (outputChannels > 0)
 	{
-		auto* channelData = buffer.getWritePointer (0);
-
-		for (int sample = 0; sample < bufferNumSamples; ++sample)
-			channelData[sample] = oscillator.processSample (0.0f) * testLevel;
-
-		for (int channel = 1; channel < totalNumOutputChannels; ++channel)
-			buffer.copyFrom (channel, 0, buffer, 0, 0, bufferNumSamples);
+		auto output = getBusBuffer (buffer, false, 0);
+		engine.process (&output, nullptr, &midiMessages);
 	}
 }
 
 void AudioAppProcessor::releaseResources()
 {
-	oscillator.reset();
+	// When playback stops, you can use this as an opportunity to free up any
+	// spare memory, etc.
+
+	engine.reset();
 }
 
 bool AudioAppProcessor::isBusesLayoutSupported (const BusesLayout&) const
 {
+	// AudioProcessorPlayer checks this method before it connects the processor
+	// buses to the active device channels. The current oscillator and gain can
+	// work with any output channel count and do not need matching input and output
+	// layouts. Add layout checks here if a future DSP chain has fixed channel needs.
+
 	return true;
 }
 
@@ -142,7 +131,7 @@ const juce::String AudioAppProcessor::getName() const { return JUCE_APPLICATION_
 
 double AudioAppProcessor::getTailLengthSeconds() const
 {
-	return 0.0;
+	return engine.getTailLengthSeconds();
 }
 
 bool AudioAppProcessor::acceptsMidi() const
@@ -167,10 +156,17 @@ bool AudioAppProcessor::producesMidi() const
 
 void AudioAppProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
+	/* You should use this method to store your parameters in the memory block.
+	 * You could do that either as raw data, or use the XML or ValueTree classes
+	 * as intermediaries to make it easy to save and load complex data. */
+
 	destData.setSize (0, false);
 }
 
 void AudioAppProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+	/* You should use this method to restore your parameters from this memory block,
+	 * whose contents will have been created by the getStateInformation() call. */
+
 	juce::ignoreUnused (data, sizeInBytes);
 }

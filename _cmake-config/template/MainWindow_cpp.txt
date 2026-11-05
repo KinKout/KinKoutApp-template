@@ -36,7 +36,6 @@
 
 
 #include "MainWindow.h"
-
 #include "AppComponent.h"
 
 

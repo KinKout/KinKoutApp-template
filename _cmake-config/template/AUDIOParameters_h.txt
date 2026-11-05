@@ -1,0 +1,85 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				Parameters.h
+* Author:			KinKoutDSP
+* Date:				04-Nov-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Namespace:		Parameters
+*
+* Purpose:		Define the APVTS parameter layout and resolve its value pointers.
+*
+* ================================================================================
+*
+* Info:		This is a namespace, not an object. AudioAppProcessor owns the APVTS
+*			and resolves its parameter pointers once during construction.
+*			RawPointers borrows values from the APVTS; it does not own them.
+*			DSP modules receive atomic pointers, without APVTS or string IDs.
+*			Keep parameter IDs unique and stable.
+*
+* Usage:	To expose a new DSP parameter,
+*			Inside 'Parameters.h': -----------------------------------------------
+*			1. Declare a ParameterID with its unique ID.
+*				'inline const juce::ParameterID dspModule_paramID { "dspModule_ID" };'
+*			2. Add an atomic float pointer to RawPointers, initially
+*			   nullptr,
+*				'std::atomic<float>* dspModule_valuePtr = nullptr;'
+*			Inside 'Parameters.cpp': ---------------------------------------------
+*			3. Add the parameter type, display name, range and
+*			   default value to createLayout(),
+*				'layout.add (std::make_unique<juce::AudioParameterFloat> (
+*				dspModule_paramID, "DSP Module Param", juce::NormalisableRange (-60.0f, 20.0f, 0.01f), 0.0f));'
+*			4. In Parameters::resolve(), assign the raw pointer,
+*				'ptrs.dspModule_valuePtr = apvts.getRawParameterValue (dspModule_paramID.getParamID());'
+*
+*			- In DspController::bindParameters(), pass that field to the module.
+*
+*			Follow the existing example.
+*			Keep the value units consistent between the parameter definition
+*			and the DSP reader.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_audio_processors/juce_audio_processors.h>
+
+
+namespace Parameters
+{
+	// -------------------------------------------------------------------------------- APVTS layout declaration
+	juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
+
+	// -------------------------------------------------------------------------------- 1. Declare parameter IDs
+	// inline const juce::ParameterID dspModule_paramID { "dspModule_ID" };		// ~~~~~~~~ reference
+	inline const juce::ParameterID oscFrequency_paramID { "oscFrequency_ID" };	// ^^^^^^^^ example, disposable
+	inline const juce::ParameterID gainOut_paramID { "gainOut_ID" };			// ^^^^^^^^ example, disposable
+
+	// -------------------------------------------------------------------------------- 2. Declare raw pointers
+	// One borrowed value pointer per DSP parameter.
+	// Engine forwards the resolved struct to DspController, which distributes
+	// the pointers to modules. Use APVTS raw pointers for reading only; change
+	// parameters through JUCE parameter APIs or attachments.
+	struct RawPointers
+	{
+		// std::atomic<float>* dspModule_valuePtr = nullptr;				// ~~~~~~~~ reference
+		std::atomic<float>* oscFrequency_valuePtr = nullptr;				// ^^^^^^^^ example, disposable
+		std::atomic<float>* gainOut_valuePtr = nullptr;						// ^^^^^^^^ example, disposable
+	};
+
+	RawPointers resolve (const juce::AudioProcessorValueTreeState& apvts);
+}

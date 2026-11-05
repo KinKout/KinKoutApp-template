@@ -1,0 +1,111 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				Gain.cpp
+* Author:			KinKoutDSP
+* Date:				05-Nov-2026
+*
+* ================================================================================
+* 
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Class:			Gain
+*
+* Purpose:		Apply a smoothed linear gain controlled in decibels.
+*
+* ================================================================================ */
+
+
+#include "Gain.h"
+
+
+Gain::Gain() = default;
+Gain::~Gain() = default;
+
+// ================================================================================ Prepare
+void Gain::prepare (const double sampleRate, const int blockSize, const int numChannels)
+{
+	juce::ignoreUnused (blockSize, numChannels);
+
+	// Configure the ramp duration for this sample rate.
+	// Preserve the target and snap the current value to it.
+	smoothedGain.reset (sampleRate, secondSmoothingTime);
+}
+
+// ================================================================================ Process
+void Gain::process	(juce::AudioBuffer<float>* buffer,
+					const juce::AudioBuffer<float>* sidechain,
+					juce::MidiBuffer* midi)
+{
+	juce::ignoreUnused (midi, sidechain);
+	if (buffer == nullptr) return;
+
+	// Read the external target once for the whole block, if a source is bound.
+	if (gainParamDB != nullptr)
+	{
+		setGainDecibels (gainParamDB->load());
+	}
+
+	// Use one constant gain for the block when no ramp is active.
+	if (! smoothedGain.isSmoothing())
+	{
+		buffer->applyGain (smoothedGain.getCurrentValue());
+		return;
+	}
+
+	const int numChannels = buffer->getNumChannels();
+	const int numSamples  = buffer->getNumSamples();
+
+	// Advance the ramp once per sample and share that value across channels.
+	for (int i = 0; i < numSamples; ++i)
+	{
+		const float g = smoothedGain.getNextValue();
+
+		for (int ch = 0; ch < numChannels; ++ch)
+			buffer->getWritePointer (ch)[i] *= g;
+	}
+}
+
+// ================================================================================ Reset
+void Gain::reset()
+{
+	smoothedGain.setCurrentAndTargetValue (smoothedGain.getTargetValue());
+}
+
+// -------------------------------------------------------------------------------- Processor timing
+int Gain::getLatencySamples() const // NOLINT(readability-convert-member-functions-to-static)
+{
+	// Smoothing changes amplitude without delaying the audio.
+
+	constexpr int latencySamples = {0};
+	return latencySamples;
+}
+
+double Gain::getTailLengthSeconds() const // NOLINT(readability-convert-member-functions-to-static)
+{
+	// Multiplication produces no output after the input becomes silent.
+
+	constexpr double tailLengthSeconds = {0.0};
+	return tailLengthSeconds;
+}
+
+// -------------------------------------------------------------------------------- Parameter source
+void Gain::bindParameters (std::atomic<float>* gainDbSource)
+{
+	gainParamDB = gainDbSource;
+}
+
+// -------------------------------------------------------------------------------- Gain control
+void Gain::setGainDecibels (const float newGainDB)
+{
+	smoothedGain.setTargetValue (juce::Decibels::decibelsToGain (newGainDB));
+}

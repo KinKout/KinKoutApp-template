@@ -29,24 +29,32 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AudioAppProcessor
 *
-* Purpose:		Connect the JUCE processor callbacks to the application DSP.
+* Purpose:		Connect the JUCE processor callbacks to parameters and the DSP engine.
 *
 * ================================================================================
 *
-* Info:		AppComponent owns this processor and connects it to the audio device.
-*			Each application instance has its own processor and DSP resources.
+* Info:		Owned by AppComponent and connected to the audio device through
+*			AudioProcessorPlayer.
+*			Owns the APVTS, InstRack and Engine.
+*			The rack is constructed before Engine and destroyed after it.
+*			The APVTS outlives both.
+*			Each application instance has its own parameters and DSP modules.
 *			The input and output buses use the channel values set in appConfig.cmake.
-*			The current processing generates a 440 Hz sine wave at -20 dBFS for testing.
+*			Bus layout validation currently accepts every proposed layout.
 *
-* Usage:	To configure the application audio processing:
-*			1. Set the default input and output channels in appConfig.cmake.
-*			2. Replace the test oscillator and its constants with the application DSP.
+* Usage:	To configure the application processor:
+*			1. Set the default input and output channel counts in appConfig.cmake.
+*			2. Keep the MIDI options disabled until MIDI device handling is implemented.
 *
-*			- Prepare DSP resources in prepareToPlay(), process the audio buffer in
-*			  processBlock(), and reset the resources in releaseResources().
-*			- If changing the bus rules, update createBusesProperties() and
-*			  isBusesLayoutSupported().
-*			- Use the state methods when processing data must be saved and restored.
+*			- If changing bus layouts, update both createBusesProperties() and
+*				isBusesLayoutSupported() in AudioAppProcessor.cpp.
+*			- Keep member declarations ordered as apvts, instRack, engine.
+*			- Keep parameter binding in the constructor and the Engine calls in
+*				prepareToPlay(), processBlock() and releaseResources().
+*
+*			- For new DSP modules, edit InstRack and DspController.
+*			- For new parameters, edit Parameters.
+*			- No extra module wiring is needed here.
 *
 * ================================================================================ */
 
@@ -54,7 +62,9 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_dsp/juce_dsp.h>
+
+#include "engine/InstRack.h"
+#include "engine/Engine.h"
 
 
 class AudioAppProcessor final : public juce::AudioProcessor
@@ -92,15 +102,18 @@ public:
 	void getStateInformation (juce::MemoryBlock& destData) override;
 	void setStateInformation (const void* data, int sizeInBytes) override;
 
+	// ================================================================================ ValueTreeState
+	juce::AudioProcessorValueTreeState& getApvts() { return apvts; }
+
 private:
 	static BusesProperties createBusesProperties();
 
-	// Oscillator used to test the audio application build
-	juce::dsp::Oscillator<float> oscillator;
-	static constexpr float testFrequency {440.0f};
-	static constexpr float testLevel {0.1f}; // -20 dBFS
-	static constexpr std::size_t oscillatorTableSize {128};
-	static constexpr juce::uint32 oscillatorChannels {1};
+	// ================================================================================ Members
 
+	juce::AudioProcessorValueTreeState apvts;
+	InstRack instRack;
+	Engine engine;
+
+	// ================================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioAppProcessor)
 };

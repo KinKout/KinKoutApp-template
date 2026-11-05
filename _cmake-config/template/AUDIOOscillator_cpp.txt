@@ -1,0 +1,115 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				Oscillator.cpp
+* Author:			KinKoutDSP
+* Date:				05-Nov-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Class:			Oscillator
+*
+* Purpose:		Generate a smoothed sine wave shared by all output channels.
+*
+* ================================================================================ */
+
+
+#include "Oscillator.h"
+
+
+Oscillator::Oscillator()
+{
+	oscillator.initialise ([] (float phase) { return std::sin (phase); }, 128);
+	oscillator.setFrequency (targetFrequencyHz, true);
+}
+
+Oscillator::~Oscillator() = default;
+
+// ================================================================================ Prepare
+void Oscillator::prepare (const double sampleRate, const int blockSize, const int numChannels)
+{
+	juce::ignoreUnused (numChannels);
+
+	prepared = std::isfinite (sampleRate) && sampleRate > 0.0 && blockSize > 0;
+	jassert (prepared);
+	if (! prepared)
+		return;
+
+	maximumFrequencyHz = static_cast<float> (sampleRate * 0.49);
+	setFrequencyHz (frequencyParamHz != nullptr ? frequencyParamHz->load() : targetFrequencyHz);
+	oscillator.prepare ({ sampleRate, static_cast<juce::uint32> (blockSize), 1 });
+}
+
+// ================================================================================ Process
+void Oscillator::process	(juce::AudioBuffer<float>* buffer,
+							const juce::AudioBuffer<float>* sidechain,
+							juce::MidiBuffer* midi)
+{
+	juce::ignoreUnused (sidechain, midi);
+	if (buffer == nullptr || buffer->getNumChannels() == 0 || buffer->getNumSamples() == 0)
+		return;
+	if (! prepared)
+	{
+		buffer->clear();
+		return;
+	}
+	if (frequencyParamHz != nullptr)
+	{
+		setFrequencyHz (frequencyParamHz->load());
+	}
+
+	auto* firstChannel = buffer->getWritePointer (0);
+	for (int sample = 0; sample < buffer->getNumSamples(); ++sample)
+		firstChannel[sample] = oscillator.processSample (0.0f) * level;
+	for (int channel = 1; channel < buffer->getNumChannels(); ++channel)
+		buffer->copyFrom (channel, 0, *buffer, 0, 0, buffer->getNumSamples());
+}
+
+// ================================================================================ Reset
+void Oscillator::reset()
+{
+	oscillator.reset();
+}
+
+// -------------------------------------------------------------------------------- Processor timing
+int Oscillator::getLatencySamples() const // NOLINT(readability-convert-member-functions-to-static)
+{
+	// Generating samples does not delay the output.
+
+	constexpr int latencySamples = {0};
+	return latencySamples;
+}
+
+double Oscillator::getTailLengthSeconds() const // NOLINT(readability-convert-member-functions-to-static)
+{
+	// The oscillator has no stored decay after processing stops.
+
+	constexpr double tailLengthSeconds = {0.0};
+	return tailLengthSeconds;
+}
+
+// -------------------------------------------------------------------------------- Parameter source
+void Oscillator::bindParameters (std::atomic<float>* frequencySource)
+{
+	frequencyParamHz = frequencySource;
+}
+
+// -------------------------------------------------------------------------------- Frequency control
+void Oscillator::setFrequencyHz (const float newFrequencyHz)
+{
+	if (! std::isfinite (newFrequencyHz))
+		return;
+	targetFrequencyHz = newFrequencyHz;
+	oscillator.setFrequency (juce::jlimit (0.0f, maximumFrequencyHz, targetFrequencyHz));
+}

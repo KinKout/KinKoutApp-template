@@ -1,0 +1,104 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				Oscillator.h
+* Author:			KinKoutDSP
+* Date:				05-Nov-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+* Class:			Oscillator
+*
+* Purpose:		Generate a smoothed sine wave shared by all output channels.
+*
+* ================================================================================
+*
+* Info:		Generates the same sine wave for every channel, overwriting the buffer
+*			in-place.
+*			Uses a 128-point lookup table and a fixed 0.1 peak amplitude.
+*			Accepts frequency in hertz and smooths changes over 50 ms.
+*			Each instance has its own phase state and starts at 440 Hz.
+*			After preparation, frequency is limited to 0.49 times the sample rate.
+*			An optional atomic source supplies the target once per audio block.
+*			The source is borrowed, read-only to Oscillator, and must remain valid
+*			while bound.
+*			Sidechain and MIDI are ignored, a null or empty buffer is skipped.
+*			Unprepared output is cleared. Introduces no latency and no decay tail.
+*
+* Usage:	- Create an Oscillator object and call prepare() with a positive sample
+*				rate and maximum block size. numChannels is accepted but unused.
+*			- Choose how to supply the target in Hz:
+*				- Call setFrequencyHz(value) for direct control.
+*				- Call bindParameters(&atomicValue) to read an external source.
+*					While bound, that source overrides direct control on each block.
+*			- Call process(&buffer, nullptr, nullptr) for each audio block.
+*			- Call reset() to restart the phase and jump to the existing target.
+*				To return to direct control, call bindParameters(nullptr).
+*
+*			Call prepare() again when the sample rate changes, it preserves the
+*			target and jumps to it.
+*			Do not call other methods that change this object's state concurrently
+*			with process(), or process the same instance from multiple threads.
+*			An independent atomic source may be updated concurrently by its owner.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+#include <juce_dsp/juce_dsp.h>
+
+
+class Oscillator
+{
+public:
+	Oscillator();
+	~Oscillator();
+
+	// -------------------------------------------------------------------------------- Main methods
+	void prepare (double sampleRate, int blockSize, int numChannels);
+
+	void process	(juce::AudioBuffer<float>* buffer,
+					const juce::AudioBuffer<float>* sidechain,
+					juce::MidiBuffer* midi);
+
+	// Restart the phase and jump to the existing target; keep the source binding.
+	void reset();
+
+	// -------------------------------------------------------------------------------- Processor timing
+	[[nodiscard]] int getLatencySamples() const;
+
+	[[nodiscard]] double getTailLengthSeconds() const;
+
+	// -------------------------------------------------------------------------------- Parameter source
+	// Bind or unbind a borrowed atomic Hz source; this call does not read it.
+	// Passing nullptr keeps the existing target and enables direct control.
+	void bindParameters (std::atomic<float>* frequencySource);
+
+	// -------------------------------------------------------------------------------- Frequency control
+	// Set a target in Hz; smoothing takes place during process().
+	void setFrequencyHz (float newFrequencyHz);
+
+private:
+	juce::dsp::Oscillator<float> oscillator;
+	float targetFrequencyHz = 440.0f;
+	float maximumFrequencyHz = 20000.0f;
+	bool prepared = false;
+	static constexpr float level = 0.1f;
+
+	std::atomic<float>* frequencyParamHz = nullptr;
+
+	// ================================================================================
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Oscillator)
+};

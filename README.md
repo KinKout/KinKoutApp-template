@@ -12,7 +12,7 @@ The template currently creates:
 - `GUI` - a generic JUCE graphical desktop application.
 - `AUDIO` - a JUCE desktop audio application where `AppComponent` connects the audio device to an `AudioAppProcessor` based on `juce::AudioProcessor`.
 
-Both types share the same entry point and window, with a type-specific `AppComponent` implementation. The AUDIO profile currently generates a 440 Hz sine wave at -20 dBFS as an audio-output test. Reusable DSP, parameter management, MIDI device handling, and the complete processing structure of the plugin template are not yet included. `CONSOLE` is planned as a future extension.
+Both types share the same entry point and window, with a type-specific `AppComponent` implementation. The AUDIO profile includes parameter management and a separate DSP engine. Its example chain uses a 440 Hz oscillator followed by an output gain. A generic parameter editor provides the current user interface. MIDI device handling, parameter persistence and the custom user interface are not implemented yet. `CONSOLE` is planned as a future extension.
 
 - Edit one main configuration file for each new project:
 	- [appConfig.cmake][link_appConfig] with the application type, name, version and main options.
@@ -43,14 +43,18 @@ ___
 
 - **Generates the source files**
 	There are two types of source code templates: ‘essential’ and ‘optional’.
-	During the first CMake configuration, `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` are created in `source/` from the .txt files in the [template][link_template] folder using the application settings. The AUDIO profile also creates `AudioAppProcessor.h/.cpp`.
+	During the first CMake configuration, `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` are created in `source/` from the .txt files in the [template][link_template] folder using the application settings. The AUDIO profile also adds `AudioAppProcessor`, the engine classes, the parameter definitions and the example DSP modules.
 	The generator selects the `GUIAppComponent_*` or `AUDIOAppComponent_*` templates and removes the application-type prefix from the generated filenames. Both profiles therefore use the same `AppComponent` name, without a factory or a C++ conditional for selecting the application type.
 
 	The ‘essential’ source files are automatically recreated if missing.
 	Once created, existing files are left untouched, so you can edit them like any other source code.
 	Changes to the templates do not update source files that already exist.
 
-	The current template lists contain only ‘essential’ files. If ‘optional’ entries are added, missing files are generated when `_OPTIONAL_SOURCE_LOADED` is set to `FALSE` in `_cmake-config/_scripts/createSourceTemplate.cmake`. The script then resets the flag to `TRUE`, so deleted optional files are not regenerated automatically.
+	The ‘optional’ source files are created only during the first CMake configuration.
+	After that, you can use or delete them, and they will not be regenerated unless you set
+	`_OPTIONAL_SOURCE_LOADED` back to `FALSE` in `_cmake-config/_scripts/createSourceTemplate.cmake`.
+	The AUDIO optional source files are `Gain` and `Oscillator`, two simple DSP examples.
+	If you remove one of them, also remove its include, rack instance, controller calls and parameters.
   <br>
 
 - **Cross-platform without duplicating the project**
@@ -120,15 +124,15 @@ ___
 - **[source][link_source] - generated application code and user source files:**
 	- [assets-helper][link_assets-helper]: helpers for embedded or external resources;
 	- [core][link_core]: shared constants, state and general utilities;
-	- [dsp][link_dsp]: reserved for reusable audio-processing modules;
-	- [engine][link_engine]: reserved for audio-engine and DSP-chain management;
+	- [dsp][link_dsp]: reusable audio-processing modules and category headers;
+	- [engine][link_engine]: parameter, module ownership and DSP-chain management;
 	- [ui][link_ui]: reusable graphical components, shared parts and visual style.
 
 Both types generate `Main.cpp`, `MainWindow.h/.cpp` and `AppComponent.h/.cpp` directly in `source/`.
 `Main` manages the application lifecycle; `MainWindow` owns `AppComponent`.
 Both `AppComponent` implementations inherit from `juce::Component`. The GUI implementation provides the graphical application root. The AUDIO implementation owns `AudioAppProcessor`, `AudioProcessorPlayer` and `AudioDeviceManager`, connecting the processor to the system audio device.
-`AudioAppProcessor` defines its input and output buses from `appConfig.cmake` and provides the JUCE processor callbacks used for the application DSP.
-A reusable graphical `MainComponent` and the complete processing structure inherited from KinKoutDSP-template are not generated at this stage.
+`AudioAppProcessor` defines its input and output buses from `appConfig.cmake`. It owns the APVTS, the module rack and the engine. The example processing chain runs an oscillator followed by an output gain. Both controls are available through the generic editor.
+A reusable graphical `MainComponent` is not included yet. MIDI device handling and parameter persistence also remain future work.
 
 ___
 ## Notes

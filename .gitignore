@@ -8,6 +8,8 @@ cmake-build*
 # ---------- FILES
 
 TODO.txt
+AGENTS.md
+CURRENT_TASK.md
 *.log
 companyInfo.cmake
 definePath.json
@@ -22,4 +24,3 @@ definePath.json
 .DS_Store
 Thumbs.db
 desktop.ini
-

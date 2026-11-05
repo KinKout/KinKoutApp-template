@@ -3,13 +3,15 @@ ___
 #### This folder is for the user interface code.
 ___
 
-*[This folder][link_ui] is planned to contain `MainComponent.h/cpp` as the root component for the reusable UI.
-  `AppComponent` will host it in both GUI and AUDIO applications, following the same graphical
-  organisation planned for KinKoutDSP-template, where it will be hosted by `PluginEditor`.*
+[This folder][link_ui] is reserved for the custom user interface. `MainComponent.h/cpp` will be its
+root component. `AppComponent` will host it in both GUI and AUDIO applications. This follows the
+same graphical organisation used by KinKoutDSP-template, where `PluginEditor` hosts `MainComponent`.
 
-Only the folder structure is present in this version. No UI implementation files are generated here yet.
-`MainWindow` and the profile-specific `AppComponent` are generated directly in `source/`.
-The components described below are examples of the planned organisation.
+Only the folder structure is present in this version. No custom UI files are included yet.
+The AUDIO profile currently uses `GenericAudioProcessorEditor`, owned directly by `AppComponent`.
+This editor exposes the APVTS parameters until `MainComponent` and its controls are implemented.
+`MainWindow` and the profile-specific `AppComponent` are placed directly in `source/`.
+The components below show the planned organisation.
 ___
 
 It is divided into 3 subfolders:

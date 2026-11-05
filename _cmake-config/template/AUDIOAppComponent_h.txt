@@ -29,17 +29,25 @@
 * Project:			@PROJECT_NAME_T@
 * Class:			AppComponent
 *
-* Purpose:		Connect the application window, audio device,
-*				and AudioAppProcessor.
+* Purpose:		Connect the audio device and processor and own the selected UI.
 *
 * ================================================================================
 *
-* Info:		MainWindow uses this component as its content.
-*			The class creates the audio processor, opens the audio device,
-*			and connects them with AudioProcessorPlayer.
+* Info:		Used by MainWindow as the application content component.
+*			Owns AudioAppProcessor, AudioProcessorPlayer, AudioDeviceManager
+*			and the editor UI.
+*			Connects the processor to the audio device and manages the callback
+*			lifecycle.
+*			The editor is destroyed before the processor it references.
+*			Currently only GenericAudioProcessorEditor is implemented.
 *
-* Usage:	Add interface components here and put audio processing code in
-*			AudioAppProcessor. The audio device starts and stops automatically.
+* Usage:	To configure the application component:
+*			1. Keep USE_GENERIC_EDITOR enabled until the custom UI is implemented.
+*
+*			- Set the default input and output channels in appConfig.cmake.
+*
+*			Keep audio processing in AudioAppProcessor and UI composition in the
+*			selected editor component.
 *
 * ================================================================================ */
 
@@ -75,6 +83,11 @@ private:
 	juce::AudioProcessorPlayer processorPlayer;
 	juce::AudioDeviceManager deviceManager;
 
+	std::unique_ptr<juce::Component> editorUI;
 
+	// ================================================================================ 1. Options
+	#define USE_GENERIC_EDITOR true
+
+	//==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AppComponent)
 };

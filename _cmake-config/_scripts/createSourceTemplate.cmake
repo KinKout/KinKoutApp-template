@@ -45,6 +45,21 @@ set(_AUDIO_TEMPLATE_FILES
 		"essential:source:AUDIOAppComponent_h"
 		"essential:source:AUDIOAudioAppProcessor_cpp"
 		"essential:source:AUDIOAudioAppProcessor_h"
+		"essential:source/engine:AUDIODspController_cpp"
+		"essential:source/engine:AUDIODspController_h"
+		"essential:source/engine:AUDIOEngine_cpp"
+		"essential:source/engine:AUDIOEngine_h"
+		"essential:source/engine:AUDIOInstRack_cpp"
+		"essential:source/engine:AUDIOInstRack_h"
+		"essential:source/engine:AUDIOParameters_cpp"
+		"essential:source/engine:AUDIOParameters_h"
+		"essential:source/dsp:AUDIO_Dsp_h"
+		"essential:source/dsp/amplitude:AUDIO_Amplitude_h"
+		"essential:source/dsp/generators:AUDIO_Generators_h"
+		"optional:source/dsp/amplitude:AUDIOGain_cpp"
+		"optional:source/dsp/amplitude:AUDIOGain_h"
+		"optional:source/dsp/generators:AUDIOOscillator_cpp"
+		"optional:source/dsp/generators:AUDIOOscillator_h"
 )
 
 set(TEMPLATE_FILES ${_COMMON_TEMPLATE_FILES})
@@ -92,7 +107,7 @@ if(N_TEMPLATE_NOT_LOADED)
 	message("\t                           ${N_TEMPLATE_NOT_LOADED} optional files ignored, deleted by user\n")
 	message(WARNING "If you need to reload the optional source files,\n"
 			"set \"_OPTIONAL_SOURCE_LOADED\" variable to \"FALSE\"\n"
-			"at line 27 in /_cmake-config/_scripts/createSourceTemplate.cmake\" files.\n"
+			"at line 27 in /_cmake-config/_scripts/createSourceTemplate.cmake files.\n"
 			"The optional source files will be created in their original path.")
 endif ()
 message("\n")

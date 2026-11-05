@@ -1,0 +1,47 @@
+/*
+* ================================================================================
+*
+* - Creation:
+*
+* File:				_Generators.h
+* Author:			KinKoutDSP
+* Date:				04-Nov-2026
+*
+* ================================================================================
+*
+* - User build:
+* --------------------------------------------------------------------------------
+* 									SOURCE INFO
+* --------------------------------------------------------------------------------
+* Application:		@PRODUCT_NAME_T@
+* Author:			@COMPANY_NAME_T@
+* Date:				@BUILD_DATE_T@
+*
+* Project:			@PROJECT_NAME_T@
+*
+* Purpose:		Collect the enabled signal-generator module headers.
+*
+* ================================================================================
+*
+* Info:		The Generators category umbrella header.
+*			Included through _Dsp.h.
+*			Including a module makes its definition available.
+*			InstRack creates and owns the instances, DspController runs them.
+*
+* Usage:	To expose a new generator module:
+*			- Add its .h/.cpp files to this category folder.
+*			- Add its #include below, following the reference entry.
+*			- Mount an instance in InstRack and wire it in DspController.
+*
+*			Keep the folder flat, if related files need a subfolder, adjust the
+*			include path here to match.
+*
+* ================================================================================ */
+
+
+#pragma once
+
+
+// -------------------------------------------------------------------------------- Classes
+// #include "DspModule.h"												// ~~~~~~~~ reference
+#include "Oscillator.h"												// ^^^^^^^^ example, disposable
